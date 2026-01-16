@@ -8,8 +8,11 @@
           when "alert", "error" then "from-rose-950 to-rose-900 border-rose-800"
           else "from-slate-900 to-slate-800 border-slate-700"
           end %>
-        <div class="rounded-xl border px-4 py-3 text-white shadow-2xl bg-gradient-to-b <%= tone %>">
-          <p class="text-sm leading-5"><%= message %></p>
+        <div class="rounded-xl border px-4 py-3 text-white shadow-2xl bg-gradient-to-b <%= tone %> relative" data-controller="flash" data-flash-timeout-value="5000" role="alert" aria-live="polite">
+          <p class="text-sm leading-5 pr-8"><%= message %></p>
+          <button type="button" class="absolute top-2 right-2 inline-flex items-center justify-center rounded-md px-2 py-1 text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/20" aria-label="Dismiss" title="Dismiss" data-action="click->flash#dismiss">
+            &times;
+          </button>
         </div>
       <% end %>
     </div>
