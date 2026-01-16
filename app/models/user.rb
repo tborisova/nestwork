@@ -2,8 +2,8 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: { case_sensitive: false }
   validates :password_salt, presence: true
   validates :password_hash, presence: true
-  has_many :firms_designers, class_name: 'FirmDesigner'
-  has_many :firm, through: :firms_designers, inverse_of: :designer
+  has_many :firms_designers, class_name: 'FirmDesigner', foreign_key: :designer_id
+  has_many :firms, through: :firms_designers, source: :firm
 
   has_many :projects_clients, class_name: 'ProjectClient', foreign_key: :client_id
   has_many :projects_designers, class_name: 'ProjectDesigner', foreign_key: :designer_id
