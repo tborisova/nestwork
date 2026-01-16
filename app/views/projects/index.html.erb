@@ -1,0 +1,22 @@
+<% content_for :title, "Projects" %>
+
+<div class="container mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold text-white">Projects</h1>
+    <%= link_to "Add project", new_project_path, class: "inline-flex items-center px-4 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-white border border-white/10" %>
+  </div>
+
+  <% if @projects.any? %>
+    <div class="grid gap-4">
+      <% @projects.each do |project| %>
+        <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div class="text-white font-medium"><%= project.name %></div>
+          <div class="text-white/70 text-sm mt-1">Status: <%= project.status %></div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-white/80">No projects yet.</div>
+  <% end %>
+</div>
+
