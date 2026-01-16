@@ -7,3 +7,9 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# if ENV["AUTH_SEED_EMAIL"].present? && ENV["AUTH_SEED_PASSWORD"].present?
+
+user = User.create!(email: 'llama@example.com')
+user.set_password!('test')
+user.save!

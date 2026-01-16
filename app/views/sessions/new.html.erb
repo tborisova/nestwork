@@ -1,0 +1,31 @@
+<% content_for :title, "Sign in" %>
+
+<div class="container" style="max-width: 420px; margin: 2rem auto;">
+  <% if notice.present? %>
+    <div style="padding: 8px 12px; background:#e6ffed; border:1px solid #c7f5d9; margin-bottom: 12px; border-radius: 6px;"><%= notice %></div>
+  <% end %>
+  <% if alert.present? %>
+    <div style="padding: 8px 12px; background:#ffecec; border:1px solid #f5c7c7; margin-bottom: 12px; border-radius: 6px;"><%= alert %></div>
+  <% end %>
+
+  <% if current_user %>
+    <p>You are signed in as <strong><%= current_user.email %></strong>.</p>
+    <%= button_to "Sign out", session_path, method: :delete, form: { style: "display:inline" } %>
+  <% else %>
+    <h1 style="margin-bottom: 1rem;">Sign in</h1>
+    <%= form_with url: session_path, method: :post, local: true do |f| %>
+      <div style="margin-bottom: 12px;">
+        <label for="email">Email</label><br>
+        <%= email_field_tag :email, params[:email], required: true, autofocus: true, autocomplete: "email", style: "width:100%; padding:8px;" %>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label for="password">Password</label><br>
+        <%= password_field_tag :password, nil, required: true, autocomplete: "current-password", style: "width:100%; padding:8px;" %>
+      </div>
+      <div>
+        <%= submit_tag "Sign in", style: "padding:8px 12px;" %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
