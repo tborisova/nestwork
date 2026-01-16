@@ -10,6 +10,6 @@
 
 # if ENV["AUTH_SEED_EMAIL"].present? && ENV["AUTH_SEED_PASSWORD"].present?
 
-user = User.create!(email: 'llama@example.com')
+user = User.new(email: 'llama@example.com')
 user.set_password!('test')
 user.save!
