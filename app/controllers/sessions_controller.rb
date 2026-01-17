@@ -13,7 +13,8 @@ class SessionsController < ApplicationController
 
     if user&.authenticate(password)
       session[:user_id] = user.id
-      redirect_to projects_path, notice: "Signed in successfully"
+
+      redirect_to root_path, notice: "Signed in successfully"
     else
       flash.now[:alert] = "Invalid email or password"
 
@@ -23,6 +24,7 @@ class SessionsController < ApplicationController
 
   def destroy
     session.delete(:user_id)
+
     redirect_to new_session_path, notice: "Signed out"
   end
 end
