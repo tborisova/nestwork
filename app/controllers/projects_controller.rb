@@ -33,6 +33,11 @@ class ProjectsController < ApplicationController
     @projects = projects.includes(:designers, :clients).distinct.order(created_at: :desc)
   end
 
+  def show
+    firm_ids = current_user.firms.select(:id)
+    @project = Project.includes(:designers, :clients).where(firm_id: firm_ids).find(params[:id])
+  end
+
   def new
     @project = Project.new
     @firm = current_user.firms.first

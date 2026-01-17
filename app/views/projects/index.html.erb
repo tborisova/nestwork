@@ -45,7 +45,7 @@
   <% if @projects.any? %>
     <div class="space-y-3">
       <% @projects.each do |project| %>
-        <div class="rounded-lg border border-white/10 bg-white/5 p-3 overflow-hidden">
+        <%= link_to project_path(project), class: "block rounded-lg border border-white/10 bg-white/5 p-3 overflow-hidden hover:bg-white/10 transition-colors" do %>
           <div class="flex items-start justify-between gap-2">
             <div class="flex-1 min-w-0">
               <div class="text-white text-sm font-medium break-words"><%= project.name %></div>
@@ -96,7 +96,7 @@
               </div>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
     </div>
   <% else %>
