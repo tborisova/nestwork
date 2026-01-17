@@ -1,21 +1,43 @@
 <% unless flash.empty? %>
   <div class="fixed inset-x-0 top-4 z-50 px-4">
-    <div class="mx-auto max-w-xl space-y-3">
+    <div class="mx-auto max-w-md space-y-3">
       <% flash.each do |type, message| %>
-        <% tone =
-          case type.to_s
-          when "notice", "success" then "from-emerald-900 to-emerald-800 border-emerald-700"
-          when "alert", "error" then "from-rose-950 to-rose-900 border-rose-800"
-          else "from-slate-900 to-slate-800 border-slate-700"
-          end %>
-        <div class="rounded-xl border px-4 py-3 text-white shadow-2xl bg-gradient-to-b <%= tone %> relative" data-controller="flash" data-flash-timeout-value="5000" role="alert" aria-live="polite">
-          <p class="text-sm leading-5 pr-8"><%= message %></p>
-          <button type="button" class="absolute top-2 right-2 inline-flex items-center justify-center rounded-md px-2 py-1 text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/20" aria-label="Dismiss" title="Dismiss" data-action="click->flash#dismiss">
-            &times;
+        <% case type.to_s
+           when "notice", "success"
+             icon_path = "M5 13l4 4L19 7"
+             bg_class = "from-emerald-500/20 to-cyan-500/20 border-emerald-500/30"
+             icon_class = "text-emerald-400"
+           when "alert", "error"
+             icon_path = "M6 18L18 6M6 6l12 12"
+             bg_class = "from-rose-500/20 to-pink-500/20 border-rose-500/30"
+             icon_class = "text-rose-400"
+           else
+             icon_path = "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+             bg_class = "from-white/10 to-white/5 border-white/20"
+             icon_class = "text-white/60"
+           end %>
+        <div class="rounded-2xl border backdrop-blur-xl px-4 py-4 text-white shadow-2xl bg-gradient-to-r <%= bg_class %> relative flex items-start gap-3"
+             data-controller="flash"
+             data-flash-timeout-value="5000"
+             role="alert"
+             aria-live="polite">
+          <div class="shrink-0">
+            <svg class="w-5 h-5 <%= icon_class %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icon_path %>"/>
+            </svg>
+          </div>
+          <p class="flex-1 text-sm font-medium leading-5 text-white/90"><%= message %></p>
+          <button type="button"
+                  class="shrink-0 p-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Dismiss"
+                  title="Dismiss"
+                  data-action="click->flash#dismiss">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           </button>
         </div>
       <% end %>
     </div>
   </div>
 <% end %>
-

@@ -1,56 +1,85 @@
 <% content_for :title, "Add New Product" %>
 <% content_for :back_path, project_path(@project) %>
 
-<div class="container mx-auto px-4 py-6">
-  <div class="mb-4">
-    <h1 class="text-2xl font-semibold text-white">Add New Product</h1>
-    <p class="text-white/60 mt-1">Room: <%= @room.name %> &middot; Project: <%= @project.name %></p>
-  </div>
-  <div class="rounded-2xl border border-white/10 bg-white/5 p-6 max-w-2xl">
-    <%= form_with model: @selection, url: project_selections_path(@project, room: @room.name), method: :post, local: true do |f| %>
-      <div class="mb-6">
-        <h2 class="text-lg font-medium text-white mb-4">Product Details</h2>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <%= f.label :name, "Product name", class: "block mb-2 text-white/90" %>
-            <%= f.text_field :name, required: true, placeholder: "e.g. Bed, Sofa, Lamp", class: "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
-          </div>
-          <div>
-            <%= f.label :quantity, "Quantity", class: "block mb-2 text-white/90" %>
-            <%= f.number_field :quantity, min: 1, value: 1, class: "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
-          </div>
-        </div>
+<div class="py-10">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/25">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
       </div>
+      <h1 class="text-3xl font-display font-bold gradient-text">Add New Product</h1>
+      <p class="text-white/50 mt-2">
+        <span class="text-white/70"><%= @room.name %></span>
+        <span class="mx-2 text-white/30">/</span>
+        <span><%= @project.name %></span>
+      </p>
+    </div>
 
-      <div class="mb-6">
-        <h2 class="text-lg font-medium text-white mb-2">Options</h2>
-        <p class="text-white/60 text-sm mb-4">Add up to 6 options to choose from. At least one option is required.</p>
-
-        <%= f.fields_for :selection_options do |option_form| %>
-          <div class="mb-4 p-4 rounded-xl bg-white/5 border border-white/10">
-            <div class="text-white/60 text-xs uppercase tracking-wide mb-3">Option <%= option_form.index + 1 %></div>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <%= option_form.label :name, "Name", class: "block mb-1 text-white/80 text-sm" %>
-                <%= option_form.text_field :name, placeholder: "e.g. IKEA MALM", class: "w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 text-white text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
-              </div>
-              <div>
-                <%= option_form.label :price, "Price", class: "block mb-1 text-white/80 text-sm" %>
-                <%= option_form.number_field :price, min: 0, placeholder: "0", class: "w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 text-white text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
-              </div>
-              <div>
-                <%= option_form.label :link, "Link", class: "block mb-1 text-white/80 text-sm" %>
-                <%= option_form.url_field :link, placeholder: "https://...", class: "w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 text-white text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
-              </div>
+    <div class="glass-card rounded-2xl p-8">
+      <%= form_with model: @selection, url: project_selections_path(@project, room: @room.name), method: :post, local: true do |f| %>
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Product Details
+          </h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <%= f.label :name, "Product name", class: "block mb-2 text-sm font-medium text-white/80" %>
+              <%= f.text_field :name, required: true, placeholder: "e.g. Bed, Sofa, Lamp", class: "input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
+            </div>
+            <div>
+              <%= f.label :quantity, "Quantity", class: "block mb-2 text-sm font-medium text-white/80" %>
+              <%= f.number_field :quantity, min: 1, value: 1, class: "input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
             </div>
           </div>
-        <% end %>
-      </div>
+        </div>
 
-      <div class="flex items-center gap-3">
-        <%= f.submit "Add product", class: "inline-flex items-center justify-center px-4 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-medium border border-white/10 cursor-pointer" %>
-        <%= link_to "Cancel", project_path(@project), class: "inline-flex items-center px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10" %>
-      </div>
-    <% end %>
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+            </svg>
+            Options
+          </h2>
+          <p class="text-white/40 text-sm mb-5">Add up to 6 options for the client to choose from. At least one option is required.</p>
+
+          <div class="space-y-4">
+            <%= f.fields_for :selection_options do |option_form| %>
+              <div class="p-5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-colors">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-xs font-semibold text-white">
+                    <%= option_form.index + 1 %>
+                  </span>
+                  <span class="text-white/60 text-sm font-medium">Option <%= option_form.index + 1 %></span>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                  <div>
+                    <%= option_form.label :name, "Name", class: "block mb-2 text-sm font-medium text-white/70" %>
+                    <%= option_form.text_field :name, placeholder: "e.g. IKEA MALM", class: "input-field w-full px-3 py-2.5 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none" %>
+                  </div>
+                  <div>
+                    <%= option_form.label :price, "Price ($)", class: "block mb-2 text-sm font-medium text-white/70" %>
+                    <%= option_form.number_field :price, min: 0, placeholder: "0", class: "input-field w-full px-3 py-2.5 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none" %>
+                  </div>
+                  <div>
+                    <%= option_form.label :link, "Product link", class: "block mb-2 text-sm font-medium text-white/70" %>
+                    <%= option_form.url_field :link, placeholder: "https://...", class: "input-field w-full px-3 py-2.5 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none" %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+          <%= f.submit "Add Product", class: "btn-primary flex-1 py-4 rounded-xl text-white font-semibold cursor-pointer" %>
+          <%= link_to "Cancel", project_path(@project), class: "btn-secondary px-6 py-4 rounded-xl text-white/80 font-medium text-center" %>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>

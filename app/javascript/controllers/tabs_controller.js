@@ -19,11 +19,11 @@ export default class extends Controller {
   }
 
   setActive(tabEl) {
-    const activeClasses = ["bg-white/20", "text-white"];
+    const activeClasses = ["bg-white/15", "text-white", "shadow-lg"];
     const inactiveClasses = [
-      "bg-white/10",
-      "text-white/80",
-      "hover:bg-white/20",
+      "bg-transparent",
+      "text-white/60",
+      "hover:bg-white/10",
       "hover:text-white",
     ];
 
@@ -31,12 +31,13 @@ export default class extends Controller {
     this.tabTargets.forEach((t) => {
       t.classList.remove(...activeClasses, ...inactiveClasses);
       t.classList.add(
-        "px-3",
-        "py-1.5",
-        "rounded-md",
+        "px-4",
+        "py-2",
+        "rounded-xl",
         "text-sm",
-        "border",
-        "border-white/10"
+        "font-medium",
+        "transition-all",
+        "whitespace-nowrap"
       );
       if (t === tabEl) {
         t.dataset.active = "true";
@@ -62,45 +63,60 @@ export default class extends Controller {
       let productsHtml = "";
       if (products.length > 0) {
         productsHtml = `
-          <div class="mb-6">
-            <h3 class="text-white font-medium mb-3">Selected Products</h3>
-            <table class="w-full">
-              <thead>
-                <tr class="text-left text-white/60 text-xs uppercase tracking-wide border-b border-white/10">
-                  <th class="pb-2">Name</th>
-                  <th class="pb-2">Price</th>
-                  <th class="pb-2">Qty</th>
-                  <th class="pb-2">Status</th>
-                  <th class="pb-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                ${products
-                  .map(
-                    (p) => `
-                  <tr class="border-b border-white/5">
-                    <td class="py-2 text-white">${this.escape(p.name)}</td>
-                    <td class="py-2 text-white/80">${p.price ? "$" + p.price : "-"}</td>
-                    <td class="py-2 text-white/80">${p.quantity || 1}</td>
-                    <td class="py-2">
-                      <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${this.statusClass(p.status)}">${this.escape(p.status || "pending")}</span>
-                    </td>
-                    <td class="py-2 text-right flex items-center justify-end gap-2">
-                      ${p.link ? `<a href="${this.escape(p.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 text-xs">View</a>` : ""}
-                      <button type="button" class="text-white/60 hover:text-white text-xs flex items-center gap-1" data-action="click->tabs#openComments" data-type="product" data-id="${p.id}" data-name="${this.escape(p.name)}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                        ${p.comments_count > 0 ? `<span class="bg-fuchsia-600 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center">${p.comments_count}</span>` : ""}
-                      </button>
-                      ${this.statusActionButton(p, projectId)}
-                    </td>
+          <div class="mb-8">
+            <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Selected Products
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="text-left text-white/40 text-xs uppercase tracking-wider border-b border-white/10">
+                    <th class="pb-3 font-medium">Product</th>
+                    <th class="pb-3 font-medium">Price</th>
+                    <th class="pb-3 font-medium">Qty</th>
+                    <th class="pb-3 font-medium">Status</th>
+                    <th class="pb-3 font-medium text-right">Actions</th>
                   </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  ${products
+                    .map(
+                      (p) => `
+                    <tr class="group hover:bg-white/[0.02] transition-colors">
+                      <td class="py-4">
+                        <span class="text-white font-medium">${this.escape(p.name)}</span>
+                      </td>
+                      <td class="py-4">
+                        <span class="text-white/70">${p.price ? "$" + p.price.toLocaleString() : "-"}</span>
+                      </td>
+                      <td class="py-4">
+                        <span class="text-white/70">${p.quantity || 1}</span>
+                      </td>
+                      <td class="py-4">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${this.statusClass(p.status)}">${this.escape(p.status || "pending")}</span>
+                      </td>
+                      <td class="py-4">
+                        <div class="flex items-center justify-end gap-3">
+                          ${p.link ? `<a href="${this.escape(p.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors">View</a>` : ""}
+                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="product" data-id="${p.id}" data-name="${this.escape(p.name)}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            ${p.comments_count > 0 ? `<span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center font-semibold">${p.comments_count}</span>` : ""}
+                          </button>
+                          ${this.statusActionButton(p, projectId)}
+                        </div>
+                      </td>
+                    </tr>
+                  `
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            </div>
           </div>
         `;
       }
@@ -110,45 +126,55 @@ export default class extends Controller {
       if (selections.length > 0) {
         selectionsHtml = `
           <div>
-            <h3 class="text-white font-medium mb-3">Pending Selections</h3>
+            <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Pending Selections
+            </h3>
             <div class="space-y-4">
               ${selections
                 .map((s) => {
                   const optionsHtml = s.options
                     .map(
                       (o) => `
-                    <div class="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
-                      <div class="flex-1">
-                        <div class="text-white text-sm">${this.escape(o.name)}</div>
-                        <div class="text-white/60 text-xs mt-0.5">
-                          ${o.price ? "$" + o.price : "No price"}
-                          ${o.link ? ` · <a href="${this.escape(o.link)}" target="_blank" class="text-sky-400 hover:text-sky-300">View</a>` : ""}
+                      <div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] transition-colors">
+                        <div class="flex-1">
+                          <div class="text-white font-medium">${this.escape(o.name)}</div>
+                          <div class="text-white/50 text-sm mt-0.5 flex items-center gap-2">
+                            ${o.price ? `<span>$${o.price.toLocaleString()}</span>` : "<span>No price</span>"}
+                            ${o.link ? `<span class="text-white/30">·</span> <a href="${this.escape(o.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors">View product</a>` : ""}
+                          </div>
                         </div>
+                        <form action="/projects/${projectId}/selections/${s.id}/select_option?option_id=${o.id}&room=${encodeURIComponent(roomName)}" method="post" class="inline ml-4">
+                          <input type="hidden" name="authenticity_token" value="${this.getCSRFToken()}">
+                          <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-medium shadow-lg shadow-emerald-500/20 transition-all">Select</button>
+                        </form>
                       </div>
-                      <form action="/projects/${projectId}/selections/${s.id}/select_option?option_id=${o.id}&room=${encodeURIComponent(roomName)}" method="post" class="inline">
-                        <input type="hidden" name="authenticity_token" value="${this.getCSRFToken()}">
-                        <button type="submit" class="text-xs px-3 py-1.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white border border-white/10">Select</button>
-                      </form>
-                    </div>
-                  `
+                    `
                     )
                     .join("");
 
                   return `
-                    <div class="rounded-lg border border-amber-500/30 bg-amber-900/10 p-3">
-                      <div class="flex items-center justify-between mb-3">
+                    <div class="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-5">
+                      <div class="flex items-center justify-between mb-4">
                         <div>
-                          <div class="text-white font-medium">${this.escape(s.name)}</div>
-                          <div class="text-white/60 text-xs mt-0.5">Qty: ${s.quantity || 1} · ${s.options.length} option${s.options.length !== 1 ? "s" : ""}</div>
+                          <div class="text-white font-semibold text-lg">${this.escape(s.name)}</div>
+                          <div class="text-white/50 text-sm mt-1">Quantity: ${s.quantity || 1} · ${s.options.length} option${s.options.length !== 1 ? "s" : ""} available</div>
                         </div>
-                        <div class="flex items-center gap-2">
-                          <button type="button" class="text-white/60 hover:text-white text-xs flex items-center gap-1" data-action="click->tabs#openComments" data-type="selection" data-id="${s.id}" data-name="${this.escape(s.name)}">
+                        <div class="flex items-center gap-3">
+                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="selection" data-id="${s.id}" data-name="${this.escape(s.name)}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
-                            ${s.comments_count > 0 ? `<span class="bg-fuchsia-600 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center">${s.comments_count}</span>` : ""}
+                            ${s.comments_count > 0 ? `<span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center font-semibold">${s.comments_count}</span>` : ""}
                           </button>
-                          <span class="text-xs px-2 py-1 rounded bg-amber-600 text-white">Awaiting selection</span>
+                          <span class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Awaiting
+                          </span>
                         </div>
                       </div>
                       <div class="space-y-2">
@@ -166,35 +192,52 @@ export default class extends Controller {
       // Empty state
       let emptyHtml = "";
       if (products.length === 0 && selections.length === 0) {
-        emptyHtml = `<div class="text-white/50 text-sm py-4">No products in this room yet.</div>`;
+        emptyHtml = `
+          <div class="text-center py-12">
+            <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            </div>
+            <p class="text-white/40 text-sm">No products in this room yet</p>
+          </div>
+        `;
       }
 
       const addProductButton = this.isDesignerValue
-        ? `<a href="${addProductUrl}" class="inline-flex items-center px-3 py-1.5 rounded-md bg-emerald-700 hover:bg-emerald-600 text-white border border-white/10">
-              Add new product
+        ? `<a href="${addProductUrl}" class="btn-primary-small inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm shadow-lg shadow-purple-500/20" style="background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Product
             </a>`
         : "";
 
       const roomCommentsButton = roomData && roomData.room_id
-        ? `<button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10" data-action="click->tabs#openComments" data-type="room" data-id="${roomData.room_id}" data-name="${escaped}">
+        ? `<button type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-sm font-medium transition-all" data-action="click->tabs#openComments" data-type="room" data-id="${roomData.room_id}" data-name="${escaped}">
              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
              </svg>
-             Room Comments
-             ${roomData.comments_count > 0 ? `<span class="bg-fuchsia-600 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center">${roomData.comments_count}</span>` : ""}
+             Comments
+             ${roomData.comments_count > 0 ? `<span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center font-semibold">${roomData.comments_count}</span>` : ""}
            </button>`
         : "";
 
       const roomTotal = roomData ? roomData.total : 0;
       const roomTotalHtml = roomTotal > 0
-        ? `<div class="text-white font-medium">$${roomTotal.toLocaleString()}</div>`
+        ? `<div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+             </svg>
+             <span class="text-emerald-300 font-semibold">$${roomTotal.toLocaleString()}</span>
+           </div>`
         : "";
 
       // Room plan button - view if exists
       let roomPlanHtml = "";
       if (roomData && roomData.plan_url) {
         roomPlanHtml = `
-          <a href="${roomData.plan_url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-sky-700 hover:bg-sky-600 text-white border border-white/10">
+          <a href="${roomData.plan_url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-sky-200 border border-sky-500/20 text-sm font-medium transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
             </svg>
@@ -206,11 +249,11 @@ export default class extends Controller {
       let roomPlanWithProductsHtml = "";
       if (roomData && roomData.plan_with_products_url) {
         roomPlanWithProductsHtml = `
-          <a href="${roomData.plan_with_products_url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-700 hover:bg-emerald-600 text-white border border-white/10">
+          <a href="${roomData.plan_with_products_url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 hover:text-violet-200 border border-violet-500/20 text-sm font-medium transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
             </svg>
-            Plan with Products
+            Plan + Products
           </a>`;
       }
 
@@ -219,16 +262,16 @@ export default class extends Controller {
       let uploadPlanWithProductsHtml = "";
       if (this.isDesignerValue) {
         uploadPlanHtml = `
-          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10 cursor-pointer">
+          <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-sm font-medium cursor-pointer transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
-            ${roomData && roomData.plan_url ? "Replace Plan" : "Upload Plan"}
+            ${roomData && roomData.plan_url ? "Replace" : "Upload"} Plan
             <input type="file" class="hidden" accept="image/*,.pdf" data-action="change->tabs#uploadPlan" data-room-id="${roomData ? roomData.room_id : ""}" data-room-name="${escaped}" data-plan-type="plan">
           </label>`;
 
         uploadPlanWithProductsHtml = `
-          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10 cursor-pointer">
+          <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-sm font-medium cursor-pointer transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
@@ -238,9 +281,9 @@ export default class extends Controller {
       }
 
       this.contentTarget.innerHTML = `
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/10">
           <div class="flex items-center gap-4">
-            <div class="text-white/80 text-sm">${escaped}</div>
+            <h2 class="text-xl font-semibold text-white">${escaped}</h2>
             ${roomTotalHtml}
           </div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -268,13 +311,13 @@ export default class extends Controller {
   statusClass(status) {
     switch (status) {
       case "approved":
-        return "bg-emerald-700 text-white";
+        return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
       case "ordered":
-        return "bg-amber-600 text-white";
+        return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
       case "delivered":
-        return "bg-sky-600 text-white";
+        return "bg-sky-500/20 text-sky-300 border border-sky-500/30";
       default:
-        return "bg-white/20 text-white/80";
+        return "bg-white/10 text-white/60 border border-white/10";
     }
   }
 
@@ -282,24 +325,24 @@ export default class extends Controller {
     const status = product.status || "pending";
     let nextStatus = null;
     let buttonLabel = null;
-    let buttonClass = "";
+    let buttonStyle = "";
 
     // Determine next status and button based on current status and role
     if (status === "pending") {
       // Both clients and designers can approve
       nextStatus = "approved";
       buttonLabel = "Approve";
-      buttonClass = "bg-emerald-700 hover:bg-emerald-600";
+      buttonStyle = "background: linear-gradient(135deg, #10b981 0%, #34d399 100%);";
     } else if (status === "approved" && this.isDesignerValue) {
       // Only designers can mark as ordered
       nextStatus = "ordered";
       buttonLabel = "Mark Ordered";
-      buttonClass = "bg-amber-600 hover:bg-amber-500";
+      buttonStyle = "background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);";
     } else if (status === "ordered" && this.isDesignerValue) {
       // Only designers can mark as delivered
       nextStatus = "delivered";
       buttonLabel = "Mark Delivered";
-      buttonClass = "bg-sky-600 hover:bg-sky-500";
+      buttonStyle = "background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);";
     }
 
     if (!nextStatus) return "";
@@ -308,7 +351,7 @@ export default class extends Controller {
       <form action="/projects/${projectId}/products/${product.id}/update_status" method="post" class="inline">
         <input type="hidden" name="authenticity_token" value="${this.getCSRFToken()}">
         <input type="hidden" name="status" value="${nextStatus}">
-        <button type="submit" class="text-xs px-2 py-1 rounded ${buttonClass} text-white border border-white/10">${buttonLabel}</button>
+        <button type="submit" class="text-sm px-3 py-1.5 rounded-lg text-white font-medium shadow-md transition-all hover:shadow-lg" style="${buttonStyle}">${buttonLabel}</button>
       </form>
     `;
   }
