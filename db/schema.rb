@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_17_153849) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -41,8 +41,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_153849) do
 
   create_table "comments", force: :cascade do |t|
     t.text "comment"
-    t.boolean "resolved"
-    t.integer "user_id"
+    t.boolean "resolved", default: false, null: false
+    t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "commentable_type"
@@ -52,29 +52,35 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_153849) do
   end
 
   create_table "firms", force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.string "website_url"
-    t.string "owner_id"
+    t.integer "owner_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "firms_clients", force: :cascade do |t|
-    t.integer "firm_id"
-    t.integer "client_id"
+    t.integer "firm_id", null: false
+    t.integer "client_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_firms_clients_on_client_id"
+    t.index ["firm_id", "client_id"], name: "index_firms_clients_unique", unique: true
+    t.index ["firm_id"], name: "index_firms_clients_on_firm_id"
   end
 
   create_table "firms_designers", force: :cascade do |t|
-    t.integer "firm_id"
-    t.integer "designer_id"
+    t.integer "firm_id", null: false
+    t.integer "designer_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["designer_id"], name: "index_firms_designers_on_designer_id"
+    t.index ["firm_id", "designer_id"], name: "index_firms_designers_unique", unique: true
+    t.index ["firm_id"], name: "index_firms_designers_on_firm_id"
   end
 
   create_table "products", force: :cascade do |t|
-    t.integer "room_id"
+    t.integer "room_id", null: false
     t.string "name"
     t.string "link"
     t.integer "price"
@@ -82,36 +88,45 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_153849) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_products_on_room_id"
   end
 
   create_table "projects", force: :cascade do |t|
-    t.string "name"
-    t.integer "firm_id"
+    t.string "name", null: false
+    t.integer "firm_id", null: false
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["firm_id"], name: "index_projects_on_firm_id"
   end
 
   create_table "projects_clients", force: :cascade do |t|
-    t.integer "client_id"
-    t.integer "project_id"
+    t.integer "client_id", null: false
+    t.integer "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_projects_clients_on_client_id"
+    t.index ["project_id", "client_id"], name: "index_projects_clients_unique", unique: true
+    t.index ["project_id"], name: "index_projects_clients_on_project_id"
   end
 
   create_table "projects_designers", force: :cascade do |t|
-    t.integer "designer_id"
-    t.integer "project_id"
+    t.integer "designer_id", null: false
+    t.integer "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["designer_id"], name: "index_projects_designers_on_designer_id"
+    t.index ["project_id", "designer_id"], name: "index_projects_designers_unique", unique: true
+    t.index ["project_id"], name: "index_projects_designers_on_project_id"
   end
 
   create_table "rooms", force: :cascade do |t|
-    t.string "name"
-    t.integer "project_id"
+    t.string "name", null: false
+    t.integer "project_id", null: false
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_rooms_on_project_id"
   end
 
   create_table "selection_options", force: :cascade do |t|
@@ -135,16 +150,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_153849) do
 
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
-    t.string "password_salt", null: false
-    t.string "password_hash", null: false
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "password_digest", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "comments", "users"
+  add_foreign_key "firms", "users", column: "owner_id"
+  add_foreign_key "firms_clients", "firms"
+  add_foreign_key "firms_clients", "users", column: "client_id"
+  add_foreign_key "firms_designers", "firms"
+  add_foreign_key "firms_designers", "users", column: "designer_id"
+  add_foreign_key "products", "rooms"
+  add_foreign_key "projects", "firms"
+  add_foreign_key "projects_clients", "projects"
+  add_foreign_key "projects_clients", "users", column: "client_id"
+  add_foreign_key "projects_designers", "projects"
+  add_foreign_key "projects_designers", "users", column: "designer_id"
+  add_foreign_key "rooms", "projects"
   add_foreign_key "selection_options", "selections"
   add_foreign_key "selections", "rooms"
 end
