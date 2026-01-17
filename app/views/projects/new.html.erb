@@ -4,7 +4,38 @@
   <div class="mb-4">
     <h1 class="text-2xl font-semibold text-white">New Project</h1>
   </div>
-  <div class="text-white/80 mb-6">Coming soon.</div>
-  <%= link_to "Back to projects", projects_path, class: "inline-flex items-center px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10" %>
+  <div class="rounded-2xl border border-white/10 bg-white/5 p-6 max-w-xl">
+    <%= form_with model: @project, url: projects_path, method: :post, local: true do |f| %>
+      <div class="mb-4">
+        <%= f.label :name, "Project name", class: "block mb-2 text-white/90" %>
+        <%= f.text_field :name, required: true, class: "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-2 text-white/90">Clients</label>
+        <%= select_tag "project[client_ids][]",
+              options_from_collection_for_select(@clients, :id, :name),
+              multiple: true,
+              class: "w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent",
+              size: 6 %>
+        <p class="mt-1 text-xs text-white/60">Select one or more clients from this firm.</p>
+      </div>
+
+      <div class="mb-6">
+        <label class="block mb-2 text-white/90">Designers</label>
+        <%= select_tag "project[designer_ids][]",
+              options_from_collection_for_select(@designers, :id, :name),
+              multiple: true,
+              class: "w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent",
+              size: 6 %>
+        <p class="mt-1 text-xs text-white/60">Select one or more designers who work for this firm.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "Create project", class: "inline-flex items-center justify-center px-4 py-3 rounded-xl bg-purple-950 hover:bg-purple-900 text-white font-medium border border-white/10" %>
+        <%= link_to "Cancel", projects_path, class: "inline-flex items-center px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10" %>
+      </div>
+    <% end %>
   </div>
+</div>
 

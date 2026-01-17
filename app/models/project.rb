@@ -1,4 +1,6 @@
 class Project < ApplicationRecord
+  attribute :status, :string, default: "new"
+
   has_many :projects_clients, class_name: 'ProjectClient'
   has_many :projects_designers, class_name: 'ProjectDesigner'
 
