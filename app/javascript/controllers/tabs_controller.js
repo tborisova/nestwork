@@ -87,6 +87,12 @@ export default class extends Controller {
                     </td>
                     <td class="py-2 text-right flex items-center justify-end gap-2">
                       ${p.link ? `<a href="${this.escape(p.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 text-xs">View</a>` : ""}
+                      <button type="button" class="text-white/60 hover:text-white text-xs flex items-center gap-1" data-action="click->tabs#openComments" data-type="product" data-id="${p.id}" data-name="${this.escape(p.name)}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        ${p.comments_count > 0 ? `<span class="bg-fuchsia-600 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center">${p.comments_count}</span>` : ""}
+                      </button>
                       ${this.statusActionButton(p, projectId)}
                     </td>
                   </tr>
@@ -135,7 +141,15 @@ export default class extends Controller {
                           <div class="text-white font-medium">${this.escape(s.name)}</div>
                           <div class="text-white/60 text-xs mt-0.5">Qty: ${s.quantity || 1} · ${s.options.length} option${s.options.length !== 1 ? "s" : ""}</div>
                         </div>
-                        <span class="text-xs px-2 py-1 rounded bg-amber-600 text-white">Awaiting selection</span>
+                        <div class="flex items-center gap-2">
+                          <button type="button" class="text-white/60 hover:text-white text-xs flex items-center gap-1" data-action="click->tabs#openComments" data-type="selection" data-id="${s.id}" data-name="${this.escape(s.name)}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            ${s.comments_count > 0 ? `<span class="bg-fuchsia-600 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center">${s.comments_count}</span>` : ""}
+                          </button>
+                          <span class="text-xs px-2 py-1 rounded bg-amber-600 text-white">Awaiting selection</span>
+                        </div>
                       </div>
                       <div class="space-y-2">
                         ${optionsHtml}
@@ -161,10 +175,21 @@ export default class extends Controller {
             </a>`
         : "";
 
+      const roomCommentsButton = roomData && roomData.room_id
+        ? `<button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10" data-action="click->tabs#openComments" data-type="room" data-id="${roomData.room_id}" data-name="${escaped}">
+             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+             </svg>
+             Room Comments
+             ${roomData.comments_count > 0 ? `<span class="bg-fuchsia-600 text-white text-xs rounded-full px-1.5 min-w-[18px] text-center">${roomData.comments_count}</span>` : ""}
+           </button>`
+        : "";
+
       this.contentTarget.innerHTML = `
         <div class="flex items-center justify-between mb-4">
           <div class="text-white/80 text-sm">${escaped}</div>
           <div class="flex items-center gap-2">
+            ${roomCommentsButton}
             <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-sky-700 hover:bg-sky-600 text-white border border-white/10">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
@@ -238,5 +263,17 @@ export default class extends Controller {
   getCSRFToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute("content") : "";
+  }
+
+  openComments(event) {
+    const type = event.currentTarget.dataset.type;
+    const id = event.currentTarget.dataset.id;
+    const name = event.currentTarget.dataset.name;
+
+    // Dispatch custom event to open the comments panel
+    this.dispatch("openCommentsPanel", {
+      detail: { type, id, name },
+      bubbles: true,
+    });
   }
 }

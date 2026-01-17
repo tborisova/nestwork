@@ -15,9 +15,14 @@ Rails.application.routes.draw do
   resources :projects, only: [ :index, :new, :create, :show ] do
     resources :selections, only: [ :new, :create ] do
       post :select_option, on: :member
+      resources :comments, only: [ :index, :create, :update, :destroy ]
     end
     resources :products, only: [] do
       post :update_status, on: :member
+      resources :comments, only: [ :index, :create, :update, :destroy ]
+    end
+    resources :rooms, only: [] do
+      resources :comments, only: [ :index, :create, :update, :destroy ]
     end
   end
   resource :session, only: [ :new, :create, :destroy ]

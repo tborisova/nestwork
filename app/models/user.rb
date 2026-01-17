@@ -10,6 +10,7 @@ class User < ApplicationRecord
 
   has_many :client_projects, through: :projects_clients, class_name: "Project", source: :project
   has_many :designer_projects, through: :projects_designers, class_name: "Project", source: :project
+  has_many :comments, dependent: :destroy
 
   class << self
     def compute_hash(salt, plaintext_password) = Digest::SHA256.hexdigest("#{salt}::#{plaintext_password}")

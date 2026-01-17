@@ -48,7 +48,7 @@ class ProjectsController < ApplicationController
 
   def show
     firm_ids = current_user.firms.select(:id)
-    @project = Project.includes(:designers, :clients, rooms: [:products, { selections: :selection_options }])
+    @project = Project.includes(:designers, :clients, rooms: [ { products: :comments }, { selections: [ :selection_options, :comments ] }, :comments ])
                       .where(firm_id: firm_ids)
                       .or(Project.where(id: current_user.client_projects.select(:id)))
                       .find(params[:id])
@@ -111,19 +111,22 @@ class ProjectsController < ApplicationController
   end
 
   def build_rooms_data
-    room_names = ["Living room", "Kitchen", "Dining room", "Master bedroom", "Guest bedroom", "Master bathroom"]
+    room_names = [ "Living room", "Kitchen", "Dining room", "Master bedroom", "Guest bedroom", "Master bathroom" ]
     room_names.map do |name|
       room = @project.rooms.find { |r| r.name == name }
       {
         name: name,
+        room_id: room&.id,
+        comments_count: room ? room.comments.size : 0,
         products: room ? room.products.map { |p|
-          { id: p.id, name: p.name, price: p.price, link: p.link, quantity: p.quantity, status: p.status }
+          { id: p.id, name: p.name, price: p.price, link: p.link, quantity: p.quantity, status: p.status, comments_count: p.comments.size }
         } : [],
         selections: room ? room.selections.map { |s|
           {
             id: s.id,
             name: s.name,
             quantity: s.quantity,
+            comments_count: s.comments.size,
             options: s.selection_options.map { |o| { id: o.id, name: o.name, price: o.price, link: o.link } }
           }
         } : []
