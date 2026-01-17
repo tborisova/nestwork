@@ -190,6 +190,31 @@ export default class extends Controller {
         ? `<div class="text-white font-medium">$${roomTotal.toLocaleString()}</div>`
         : "";
 
+      // Room plan button - view if exists, upload for designers
+      let roomPlanHtml = "";
+      if (roomData && roomData.plan_url) {
+        roomPlanHtml = `
+          <a href="${roomData.plan_url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-sky-700 hover:bg-sky-600 text-white border border-white/10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+            View Plan
+          </a>`;
+      }
+
+      // Upload button for designers
+      let uploadPlanHtml = "";
+      if (this.isDesignerValue) {
+        uploadPlanHtml = `
+          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+            ${roomData && roomData.plan_url ? "Replace Plan" : "Upload Plan"}
+            <input type="file" class="hidden" accept="image/*,.pdf" data-action="change->tabs#uploadPlan" data-room-id="${roomData ? roomData.room_id : ""}" data-room-name="${escaped}">
+          </label>`;
+      }
+
       this.contentTarget.innerHTML = `
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
@@ -198,12 +223,8 @@ export default class extends Controller {
           </div>
           <div class="flex items-center gap-2">
             ${roomCommentsButton}
-            <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-sky-700 hover:bg-sky-600 text-white border border-white/10">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-              </svg>
-              Show room's plan
-            </button>
+            ${roomPlanHtml}
+            ${uploadPlanHtml}
             ${addProductButton}
           </div>
         </div>
@@ -283,5 +304,47 @@ export default class extends Controller {
       detail: { type, id, name },
       bubbles: true,
     });
+  }
+
+  uploadPlan(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const roomId = event.target.dataset.roomId;
+    const roomName = event.target.dataset.roomName;
+    const projectId = this.projectIdValue;
+
+    const formData = new FormData();
+    formData.append("room[plan]", file);
+
+    let url, method;
+    if (roomId) {
+      // Update existing room
+      url = `/projects/${projectId}/rooms/${roomId}`;
+      method = "PATCH";
+    } else {
+      // Create new room
+      url = `/projects/${projectId}/rooms`;
+      method = "POST";
+      formData.append("room[name]", roomName);
+    }
+
+    fetch(url, {
+      method: method,
+      body: formData,
+      headers: {
+        "X-CSRF-Token": this.getCSRFToken(),
+      },
+    })
+      .then((response) => {
+        if (response.ok || response.redirected) {
+          window.location.reload();
+        } else {
+          alert("Failed to upload plan");
+        }
+      })
+      .catch(() => {
+        alert("Failed to upload plan");
+      });
   }
 }

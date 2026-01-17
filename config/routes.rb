@@ -21,7 +21,7 @@ Rails.application.routes.draw do
       post :update_status, on: :member
       resources :comments, only: [ :index, :create, :update, :destroy ]
     end
-    resources :rooms, only: [] do
+    resources :rooms, only: [ :create, :update ] do
       resources :comments, only: [ :index, :create, :update, :destroy ]
     end
   end

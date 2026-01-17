@@ -3,4 +3,6 @@ class Room < ApplicationRecord
   has_many :products, dependent: :destroy
   has_many :selections, dependent: :destroy
   has_many :comments, as: :commentable, dependent: :destroy
+
+  has_one_attached :plan
 end

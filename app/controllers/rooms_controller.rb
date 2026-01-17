@@ -1,0 +1,50 @@
+class RoomsController < ApplicationController
+  before_action :require_login
+  before_action :set_project
+  before_action :set_room, only: [ :update ]
+  before_action :require_designer
+
+  def create
+    @room = @project.rooms.find_or_create_by!(name: params[:room][:name])
+    if @room.update(plan: params[:room][:plan])
+      redirect_to project_path(@project), notice: "Room plan uploaded"
+    else
+      redirect_to project_path(@project), alert: @room.errors.full_messages.first || "Could not upload plan"
+    end
+  end
+
+  def update
+    if @room.update(room_params)
+      redirect_to project_path(@project), notice: "Room plan uploaded"
+    else
+      redirect_to project_path(@project), alert: @room.errors.full_messages.first || "Could not upload plan"
+    end
+  end
+
+  private
+
+  def require_login
+    redirect_to new_session_path, alert: "You need to sign in first" unless current_user
+  end
+
+  def set_project
+    firm_ids = current_user.firms.select(:id)
+    @project = Project.where(firm_id: firm_ids)
+                      .or(Project.where(id: current_user.client_projects.select(:id)))
+                      .find(params[:project_id])
+  end
+
+  def set_room
+    @room = @project.rooms.find(params[:id])
+  end
+
+  def require_designer
+    unless current_user.designer_for_project?(@project)
+      redirect_to project_path(@project), alert: "Only designers can upload room plans"
+    end
+  end
+
+  def room_params
+    params.require(:room).permit(:plan)
+  end
+end
