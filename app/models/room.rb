@@ -5,4 +5,5 @@ class Room < ApplicationRecord
   has_many :comments, as: :commentable, dependent: :destroy
 
   has_one_attached :plan
+  has_one_attached :plan_with_products
 end

@@ -50,7 +50,7 @@ class ProjectsController < ApplicationController
 
   def show
     firm_ids = current_user.firms.select(:id)
-    @project = Project.includes(:designers, :clients, rooms: [ { products: :comments }, { selections: [ :selection_options, :comments ] }, :comments, { plan_attachment: :blob } ])
+    @project = Project.includes(:designers, :clients, rooms: [ { products: :comments }, { selections: [ :selection_options, :comments ] }, :comments, { plan_attachment: :blob }, { plan_with_products_attachment: :blob } ])
                       .where(firm_id: firm_ids)
                       .or(Project.where(id: current_user.client_projects.select(:id)))
                       .find(params[:id])
@@ -143,12 +143,14 @@ class ProjectsController < ApplicationController
       } : []
       room_total = products.sum { |p| (p[:price] || 0) * (p[:quantity] || 1) }
       plan_url = room&.plan&.attached? ? Rails.application.routes.url_helpers.rails_blob_path(room.plan, only_path: true) : nil
+      plan_with_products_url = room&.plan_with_products&.attached? ? Rails.application.routes.url_helpers.rails_blob_path(room.plan_with_products, only_path: true) : nil
       {
         name: name,
         room_id: room&.id,
         comments_count: room ? room.comments.size : 0,
         total: room_total,
         plan_url: plan_url,
+        plan_with_products_url: plan_with_products_url,
         products: products,
         selections: room ? room.selections.map { |s|
           {

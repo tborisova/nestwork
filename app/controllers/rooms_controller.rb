@@ -6,7 +6,11 @@ class RoomsController < ApplicationController
 
   def create
     @room = @project.rooms.find_or_create_by!(name: params[:room][:name])
-    if @room.update(plan: params[:room][:plan])
+    update_params = {}
+    update_params[:plan] = params[:room][:plan] if params[:room][:plan].present?
+    update_params[:plan_with_products] = params[:room][:plan_with_products] if params[:room][:plan_with_products].present?
+
+    if @room.update(update_params)
       redirect_to project_path(@project), notice: "Room plan uploaded"
     else
       redirect_to project_path(@project), alert: @room.errors.full_messages.first || "Could not upload plan"
@@ -45,6 +49,6 @@ class RoomsController < ApplicationController
   end
 
   def room_params
-    params.require(:room).permit(:plan)
+    params.require(:room).permit(:plan, :plan_with_products)
   end
 end

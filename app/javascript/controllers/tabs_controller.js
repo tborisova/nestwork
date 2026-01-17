@@ -190,7 +190,7 @@ export default class extends Controller {
         ? `<div class="text-white font-medium">$${roomTotal.toLocaleString()}</div>`
         : "";
 
-      // Room plan button - view if exists, upload for designers
+      // Room plan button - view if exists
       let roomPlanHtml = "";
       if (roomData && roomData.plan_url) {
         roomPlanHtml = `
@@ -202,8 +202,21 @@ export default class extends Controller {
           </a>`;
       }
 
-      // Upload button for designers
+      // Room plan with products button - view if exists (visible to all)
+      let roomPlanWithProductsHtml = "";
+      if (roomData && roomData.plan_with_products_url) {
+        roomPlanWithProductsHtml = `
+          <a href="${roomData.plan_with_products_url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-700 hover:bg-emerald-600 text-white border border-white/10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+            Plan with Products
+          </a>`;
+      }
+
+      // Upload buttons for designers
       let uploadPlanHtml = "";
+      let uploadPlanWithProductsHtml = "";
       if (this.isDesignerValue) {
         uploadPlanHtml = `
           <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10 cursor-pointer">
@@ -211,7 +224,16 @@ export default class extends Controller {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
             ${roomData && roomData.plan_url ? "Replace Plan" : "Upload Plan"}
-            <input type="file" class="hidden" accept="image/*,.pdf" data-action="change->tabs#uploadPlan" data-room-id="${roomData ? roomData.room_id : ""}" data-room-name="${escaped}">
+            <input type="file" class="hidden" accept="image/*,.pdf" data-action="change->tabs#uploadPlan" data-room-id="${roomData ? roomData.room_id : ""}" data-room-name="${escaped}" data-plan-type="plan">
+          </label>`;
+
+        uploadPlanWithProductsHtml = `
+          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/10 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+            ${roomData && roomData.plan_with_products_url ? "Replace" : "Upload"} Plan + Products
+            <input type="file" class="hidden" accept="image/*,.pdf" data-action="change->tabs#uploadPlan" data-room-id="${roomData ? roomData.room_id : ""}" data-room-name="${escaped}" data-plan-type="plan_with_products">
           </label>`;
       }
 
@@ -221,10 +243,12 @@ export default class extends Controller {
             <div class="text-white/80 text-sm">${escaped}</div>
             ${roomTotalHtml}
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             ${roomCommentsButton}
             ${roomPlanHtml}
+            ${roomPlanWithProductsHtml}
             ${uploadPlanHtml}
+            ${uploadPlanWithProductsHtml}
             ${addProductButton}
           </div>
         </div>
@@ -312,10 +336,11 @@ export default class extends Controller {
 
     const roomId = event.target.dataset.roomId;
     const roomName = event.target.dataset.roomName;
+    const planType = event.target.dataset.planType || "plan";
     const projectId = this.projectIdValue;
 
     const formData = new FormData();
-    formData.append("room[plan]", file);
+    formData.append(`room[${planType}]`, file);
 
     let url, method;
     if (roomId) {
