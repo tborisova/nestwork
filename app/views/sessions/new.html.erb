@@ -1,41 +1,47 @@
 <% content_for :title, "Sign in" %>
 
-<% content_for :head do %>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-<% end %>
-
-<div class="min-h-screen container mx-auto flex items-center justify-center px-4" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 0 16px;">
-  <%# Flash is rendered globally from layout %>
-
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
   <% if current_user %>
-    <div style="max-width: 560px; width: 100%; margin: 6rem auto; padding: 24px; border-radius: 16px; background: rgba(255,255,255,0.10); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 20px 50px rgba(0,0,0,0.35); text-align: center;">
-      <div style="font-size: 14px; letter-spacing: .12em; color: rgba(255,255,255,0.7); text-transform: uppercase; margin-bottom: 6px;">
-        Welcome
+    <div class="glass-card rounded-3xl p-10 max-w-md w-full text-center">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center mx-auto mb-6">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
       </div>
-      <h1 style="margin: 0 0 10px; font-size: 28px; line-height: 1.2; color: #ffffff;">Signed in</h1>
-      <p style="margin: 0 0 22px; color: rgba(255,255,255,0.88);">You are signed in as <strong><%= current_user.email %></strong>.</p>
-      <%= button_to "Sign out", session_path, method: :delete, form: { style: "display:inline" }, style: "cursor:pointer; border:0; border-radius: 12px; padding: 12px 16px; color:#fff; background: linear-gradient(135deg,#ec4899,#8b5cf6); box-shadow: 0 10px 22px rgba(236,72,153,0.28); transition: transform .12s ease, filter .12s ease;" %>
+      <p class="text-white/50 text-sm uppercase tracking-wider mb-2">Welcome back</p>
+      <h1 class="text-2xl font-semibold text-white mb-2">You're signed in</h1>
+      <p class="text-white/70 mb-8"><%= current_user.email %></p>
+      <%= button_to "Sign out", session_path, method: :delete, class: "btn-secondary px-6 py-3 rounded-xl text-white font-medium" %>
     </div>
   <% else %>
     <div class="w-full max-w-md">
-      <h1 class="mb-6 text-center text-4xl md:text-5xl text-white" style="font-family: 'Playfair Display', ui-serif, serif;">Nestwork</h1>
-      <div class="backdrop-blur bg-white/10 border border-white/10 rounded-2xl shadow-2xl p-8">
+      <div class="text-center mb-10">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/25">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+        </div>
+        <h1 class="text-4xl font-display font-bold text-white mb-2">Nestwork</h1>
+        <p class="text-white/50">Sign in to manage your design projects</p>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8">
         <%= form_with url: session_path, method: :post, local: true do |f| %>
-          <div class="mb-4">
-            <label for="email" class="block mb-2 text-white/90">Email</label>
-            <%= email_field_tag :email, params[:email], required: true, autofocus: true, autocomplete: "email", class: "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
+          <div class="mb-5">
+            <label for="email" class="block mb-2 text-sm font-medium text-white/80">Email address</label>
+            <%= email_field_tag :email, params[:email], required: true, autofocus: true, autocomplete: "email", placeholder: "you@example.com", class: "input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
           </div>
-          <div class="mb-6">
-            <label for="password" class="block mb-2 text-white/90">Password</label>
-            <%= password_field_tag :password, nil, required: true, autocomplete: "current-password", class: "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent" %>
+          <div class="mb-8">
+            <label for="password" class="block mb-2 text-sm font-medium text-white/80">Password</label>
+            <%= password_field_tag :password, nil, required: true, autocomplete: "current-password", placeholder: "Enter your password", class: "input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
           </div>
           <div>
-            <%= submit_tag "Sign in", class: "w-full inline-flex items-center justify-center px-4 py-3 rounded-xl bg-purple-950 hover:bg-purple-950 active:bg-purple-950 text-white font-medium border border-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/10" %>
+            <%= submit_tag "Sign in", class: "btn-primary w-full py-4 rounded-xl text-white font-semibold cursor-pointer" %>
           </div>
         <% end %>
       </div>
+
+      <p class="text-center text-white/30 text-sm mt-8">Interior design project management</p>
     </div>
   <% end %>
 </div>
-

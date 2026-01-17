@@ -1,0 +1,207 @@
+<% content_for :title, @project.name %>
+<% content_for :back_path, projects_path %>
+
+<div class="py-10" data-controller="comments-panel add-room" data-comments-panel-project-id-value="<%= @project.id %>" data-add-room-project-id-value="<%= @project.id %>" data-action="tabs:openCommentsPanel->comments-panel#open">
+  <div class="glass-card rounded-2xl p-6 mb-6 overflow-visible">
+    <div class="flex items-start justify-between gap-6">
+      <div class="flex-1 min-w-0" data-controller="inline-edit">
+        <%# Display mode %>
+        <div data-inline-edit-target="display" class="flex items-center gap-3 group">
+          <h1 class="text-2xl font-display font-bold text-white break-words"><%= @project.name %></h1>
+          <% if @is_designer %>
+            <button type="button" data-action="click->inline-edit#edit" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-all" title="Edit title">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+              </svg>
+            </button>
+          <% end %>
+        </div>
+        <%# Edit mode %>
+        <%= form_with model: @project, method: :patch, class: "hidden", data: { inline_edit_target: "form" } do |f| %>
+          <div class="flex items-center gap-2">
+            <%= f.text_field :name, value: @project.name, class: "flex-1 px-4 py-2 rounded-xl input-field text-white text-xl font-semibold focus:outline-none", data: { inline_edit_target: "input", action: "keydown->inline-edit#submitOnEnter" } %>
+            <button type="submit" class="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-colors" title="Save">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </button>
+            <button type="button" data-action="click->inline-edit#cancel" class="p-2 rounded-xl btn-secondary text-white transition-colors" title="Cancel">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        <% end %>
+
+        <div class="mt-4 flex items-center gap-4">
+          <% if @is_designer %>
+            <%# Status dropdown for designers %>
+            <div class="relative" data-controller="status-dropdown" data-status-dropdown-project-id-value="<%= @project.id %>" data-status-dropdown-current-status-value="<%= @project.status %>">
+              <button type="button" data-action="click->status-dropdown#toggle" class="flex items-center gap-2 cursor-pointer group">
+                <%= project_status_badge(@project.status) %>
+                <svg class="w-4 h-4 text-white/40 group-hover:text-white/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div data-status-dropdown-target="menu" class="hidden absolute top-full left-0 mt-2 w-48 rounded-xl glass-card border border-white/10 shadow-xl z-50 py-1">
+                <% Project::STATUSES.each do |status| %>
+                  <button type="button"
+                          data-action="click->status-dropdown#selectStatus"
+                          data-status="<%= status %>"
+                          class="w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-2 <%= status == @project.status ? 'text-white bg-white/5' : 'text-white/70' %>">
+                    <%= project_status_badge(status) %>
+                    <% if status == @project.status %>
+                      <svg class="w-4 h-4 text-emerald-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    <% end %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <%= project_status_badge(@project.status) %>
+          <% end %>
+          <% if @project_total > 0 %>
+            <div class="flex items-center gap-2 text-white/60 text-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>Project Total: <span class="text-white font-semibold">$<%= number_with_delimiter(@project_total) %></span></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex gap-8 shrink-0">
+        <div class="text-right">
+          <p class="text-white/40 text-xs uppercase tracking-wider mb-2">Designers</p>
+          <%= render "projects/user_badges", users: @project.designers, type: :designer %>
+        </div>
+
+        <div class="text-right" data-controller="invite-client" data-invite-client-project-id-value="<%= @project.id %>">
+          <p class="text-white/40 text-xs uppercase tracking-wider mb-2">Clients</p>
+          <div class="flex items-center gap-2 justify-end">
+            <%= render "projects/user_badges", users: @project.clients, type: :client %>
+            <% if @is_designer && @available_clients&.any? %>
+              <button type="button" data-action="click->invite-client#open" class="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-all" title="Add client">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+              </button>
+            <% end %>
+          </div>
+
+          <%# Invite Client Modal %>
+          <% if @is_designer && @available_clients&.any? %>
+            <div data-invite-client-target="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" data-action="click->invite-client#closeOnBackdrop keydown@window->invite-client#handleKeydown">
+              <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+              <div class="relative glass-card rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl text-left">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-semibold text-white">Add Client to Project</h3>
+                  <button type="button" data-action="click->invite-client#close" class="p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="mb-6">
+                  <label class="block mb-2 text-sm font-medium text-white/80">Select a client from your firm</label>
+                  <select data-invite-client-target="select" class="input-field w-full px-4 py-3.5 rounded-xl text-white focus:outline-none cursor-pointer">
+                    <option value="">Choose a client...</option>
+                    <% @available_clients.each do |client| %>
+                      <option value="<%= client.id %>"><%= client.name %> (<%= client.email %>)</option>
+                    <% end %>
+                  </select>
+                  <p data-invite-client-target="error" class="hidden mt-2 text-sm text-rose-400"></p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button type="button" data-action="click->invite-client#submit" data-invite-client-target="submitBtn" class="btn-primary flex-1 py-3.5 rounded-xl text-white font-semibold">
+                    Add Client
+                  </button>
+                  <button type="button" data-action="click->invite-client#close" class="btn-secondary px-6 py-3.5 rounded-xl text-white/80 font-medium">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card rounded-2xl overflow-hidden" data-controller="tabs" data-tabs-project-id-value="<%= @project.id %>" data-tabs-rooms-value="<%= @rooms_data.to_json %>" data-tabs-is-designer-value="<%= @is_designer %>">
+    <div class="flex items-center gap-1 p-2 border-b border-white/10 overflow-x-auto">
+      <% @rooms_data.each_with_index do |room, idx| %>
+        <button type="button"
+                class="px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
+                data-tabs-target="tab"
+                data-action="click->tabs#select"
+                data-room="<%= room[:name] %>"
+                data-active="<%= (idx == 0).to_s %>"><%= room[:name] %></button>
+      <% end %>
+      <% if @is_designer %>
+        <span class="ml-auto pl-2">
+          <button type="button" data-action="click->add-room#open" class="btn-primary px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Room
+          </button>
+        </span>
+      <% end %>
+    </div>
+    <div class="p-5" data-tabs-target="content"></div>
+  </div>
+
+  <%# Add Room Modal %>
+  <div data-add-room-target="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" data-action="click->add-room#closeOnBackdrop keydown@window->add-room#handleKeydown">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative glass-card rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-semibold text-white">Add New Room</h3>
+        <button type="button" data-action="click->add-room#close" class="p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="mb-6">
+        <label class="block mb-2 text-sm font-medium text-white/80">Room name</label>
+        <input type="text" data-add-room-target="input" placeholder="e.g. Guest bedroom, Office, Nursery" class="input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none">
+        <p data-add-room-target="error" class="hidden mt-2 text-sm text-rose-400"></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button" data-action="click->add-room#submit" class="btn-primary flex-1 py-3.5 rounded-xl text-white font-semibold">
+          Create Room
+        </button>
+        <button type="button" data-action="click->add-room#close" class="btn-secondary px-6 py-3.5 rounded-xl text-white/80 font-medium">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <%# Comments slide-out panel %>
+  <div data-comments-panel-target="panel" class="fixed inset-y-0 right-0 w-96 max-w-full transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);">
+    <div class="backdrop-blur-md bg-white/[0.03] border-l border-white/10 flex flex-col h-full">
+      <div class="flex items-center justify-between p-5 border-b border-white/10">
+        <h3 class="text-white font-semibold truncate" data-comments-panel-target="title">Comments</h3>
+        <button type="button" class="p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors" data-action="click->comments-panel#close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5 space-y-3" data-comments-panel-target="list">
+      </div>
+      <form class="p-5 border-t border-white/10" data-comments-panel-target="form" data-action="submit->comments-panel#submitComment">
+        <div class="flex gap-3">
+          <input type="text" placeholder="Add a comment..." data-comments-panel-target="input" class="input-field flex-1 px-4 py-3 rounded-xl placeholder-white/30 text-white text-sm focus:outline-none">
+          <button type="submit" class="btn-primary px-5 py-3 rounded-xl text-white text-sm font-medium">Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

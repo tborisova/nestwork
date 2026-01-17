@@ -1,0 +1,54 @@
+<% content_for :title, "New Project" %>
+<% content_for :back_path, projects_path %>
+
+<div class="py-10">
+  <div class="max-w-xl mx-auto">
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/25">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+      </div>
+      <h1 class="text-3xl font-display font-bold gradient-text">New Project</h1>
+      <p class="text-white/50 mt-2">Create a new design project for your client</p>
+    </div>
+
+    <div class="glass-card rounded-2xl p-8">
+      <%= form_with model: @project, url: projects_path, method: :post, local: true do |f| %>
+        <div class="mb-6">
+          <%= f.label :name, "Project name", class: "block mb-2 text-sm font-medium text-white/80" %>
+          <%= f.text_field :name, required: true, placeholder: "e.g., Downtown Apartment Renovation", class: "input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 text-sm font-medium text-white/80">Clients</label>
+          <div class="input-field rounded-xl p-1">
+            <%= select_tag "project[client_ids][]",
+                  options_from_collection_for_select(@clients, :id, :name),
+                  multiple: true,
+                  class: "w-full px-3 py-2 bg-transparent text-white focus:outline-none",
+                  size: 4 %>
+          </div>
+          <p class="mt-2 text-xs text-white/40">Hold Cmd/Ctrl to select multiple clients</p>
+        </div>
+
+        <div class="mb-8">
+          <label class="block mb-2 text-sm font-medium text-white/80">Designers</label>
+          <div class="input-field rounded-xl p-1">
+            <%= select_tag "project[designer_ids][]",
+                  options_from_collection_for_select(@designers, :id, :name),
+                  multiple: true,
+                  class: "w-full px-3 py-2 bg-transparent text-white focus:outline-none",
+                  size: 4 %>
+          </div>
+          <p class="mt-2 text-xs text-white/40">Hold Cmd/Ctrl to select multiple designers</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <%= f.submit "Create Project", class: "btn-primary flex-1 py-4 rounded-xl text-white font-semibold cursor-pointer" %>
+          <%= link_to "Cancel", projects_path, class: "btn-secondary px-6 py-4 rounded-xl text-white/80 font-medium text-center" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

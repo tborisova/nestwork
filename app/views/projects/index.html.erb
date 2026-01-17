@@ -1,0 +1,84 @@
+<% content_for :title, "Projects" %>
+
+<div class="py-10">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-display font-bold gradient-text">Projects</h1>
+      <p class="text-white/50 mt-1"><%= @projects.size %> <%= "project".pluralize(@projects.size) %></p>
+    </div>
+    <% if @is_designer %>
+      <%= link_to new_project_path, class: "btn-primary px-5 py-3 rounded-xl text-white font-medium inline-flex items-center gap-2" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        New Project
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="glass-card rounded-2xl p-5 mb-8">
+    <%= form_with url: projects_path, method: :get, local: true do %>
+      <div class="grid grid-cols-1 md:grid-cols-2 <%= @is_designer ? 'lg:grid-cols-4' : '' %> gap-4">
+        <div>
+          <label class="block mb-2 text-sm font-medium text-white/70">Search</label>
+          <%= text_field_tag :name, params[:name], placeholder: "Project name...", class: "input-field w-full px-4 py-3 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
+        </div>
+        <div>
+          <label class="block mb-2 text-sm font-medium text-white/70">Status</label>
+          <% statuses = [["New","new"],["In progress","in_progress"],["Waiting for approval","waiting_for_approval"],["Done","done"]] %>
+          <%= select_tag :status, options_for_select([["All statuses",""]] + statuses, params[:status]), class: "input-field w-full px-4 py-3 rounded-xl text-white focus:outline-none cursor-pointer" %>
+        </div>
+        <% if @is_designer %>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-white/70">Designers</label>
+            <%= select_tag "designer_ids[]",
+                  options_from_collection_for_select(@filter_designers, :id, :name, Array(params[:designer_ids])),
+                  multiple: true,
+                  include_blank: false,
+                  class: "input-field w-full px-4 py-2 rounded-xl text-white focus:outline-none",
+                  size: 3 %>
+          </div>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-white/70">Clients</label>
+            <%= select_tag "client_ids[]",
+                  options_from_collection_for_select(@filter_clients, :id, :name, Array(params[:client_ids])),
+                  multiple: true,
+                  include_blank: false,
+                  class: "input-field w-full px-4 py-2 rounded-xl text-white focus:outline-none",
+                  size: 3 %>
+          </div>
+        <% end %>
+      </div>
+      <div class="mt-5 flex items-center gap-3">
+        <%= submit_tag "Apply Filters", class: "btn-primary px-5 py-2.5 rounded-xl text-white font-medium cursor-pointer" %>
+        <%= link_to "Reset", projects_path, class: "btn-secondary px-5 py-2.5 rounded-xl text-white/80 font-medium" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @projects.any? %>
+    <div class="grid gap-4">
+      <% @projects.each do |project| %>
+        <%= render "projects/project_card", project: project, is_designer: @is_designer %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="glass-card rounded-2xl p-12 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No projects yet</h3>
+      <p class="text-white/50 mb-6">Get started by creating your first project</p>
+      <% if @is_designer %>
+        <%= link_to new_project_path, class: "btn-primary px-6 py-3 rounded-xl text-white font-medium inline-flex items-center gap-2" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Create Project
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
