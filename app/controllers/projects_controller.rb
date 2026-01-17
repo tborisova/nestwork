@@ -45,7 +45,7 @@ class ProjectsController < ApplicationController
       WHEN 'done' THEN 4
       ELSE 5
     END")
-    @projects = projects.includes(:designers, :clients).distinct.order(status_order, created_at: :desc)
+    @projects = projects.includes(:designers, :clients, :firm).distinct.order(status_order, created_at: :desc)
   end
 
   def show

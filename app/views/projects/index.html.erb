@@ -53,6 +53,9 @@
           <div class="flex items-start justify-between gap-2">
             <div class="flex-1 min-w-0">
               <div class="text-white text-sm font-medium break-words"><%= project.name %></div>
+              <% unless @is_designer %>
+                <div class="text-white/60 text-xs mt-0.5"><%= project.firm.name %></div>
+              <% end %>
               <% status_label =
                 case project.status.to_s
                 when "new" then "New"
