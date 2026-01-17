@@ -7,9 +7,15 @@ class User < ApplicationRecord
   validates :name, presence: true, length: { maximum: 100 }
   validates :password, length: { minimum: 8 }, allow_nil: true
 
+  # Designer associations
   has_many :firms_designers, class_name: "FirmDesigner", foreign_key: :designer_id
   has_many :firms, through: :firms_designers, source: :firm
 
+  # Client associations (for firms)
+  has_many :firms_clients, class_name: "FirmClient", foreign_key: :client_id
+  has_many :client_firms, through: :firms_clients, source: :firm
+
+  # Project associations
   has_many :projects_clients, class_name: "ProjectClient", foreign_key: :client_id
   has_many :projects_designers, class_name: "ProjectDesigner", foreign_key: :designer_id
 
