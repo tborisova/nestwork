@@ -5,15 +5,33 @@ class RoomsController < ApplicationController
   before_action :require_designer
 
   def create
-    @room = @project.rooms.find_or_create_by!(name: params[:room][:name])
+    room_name = params[:room][:name].to_s.strip
+    if room_name.blank?
+      respond_to do |format|
+        format.html { redirect_to project_path(@project), alert: "Room name is required" }
+        format.json { render json: { error: "Room name is required" }, status: :unprocessable_entity }
+      end
+      return
+    end
+
+    @room = @project.rooms.find_or_initialize_by(name: room_name)
+    is_new = @room.new_record?
+
     update_params = {}
     update_params[:plan] = params[:room][:plan] if params[:room][:plan].present?
     update_params[:plan_with_products] = params[:room][:plan_with_products] if params[:room][:plan_with_products].present?
 
-    if @room.update(update_params)
-      redirect_to project_path(@project), notice: "Room plan uploaded"
+    if @room.save && (update_params.empty? || @room.update(update_params))
+      respond_to do |format|
+        notice = is_new ? "Room '#{@room.name}' created" : "Room plan uploaded"
+        format.html { redirect_to project_path(@project), notice: notice }
+        format.json { render json: { id: @room.id, name: @room.name }, status: :created }
+      end
     else
-      redirect_to project_path(@project), alert: @room.errors.full_messages.first || "Could not upload plan"
+      respond_to do |format|
+        format.html { redirect_to project_path(@project), alert: @room.errors.full_messages.first || "Could not create room" }
+        format.json { render json: { error: @room.errors.full_messages.first || "Could not create room" }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -44,7 +62,7 @@ class RoomsController < ApplicationController
 
   def require_designer
     unless current_user.designer_for_project?(@project)
-      redirect_to project_path(@project), alert: "Only designers can upload room plans"
+      redirect_to project_path(@project), alert: "Only designers can manage rooms"
     end
   end
 

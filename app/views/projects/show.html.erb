@@ -1,7 +1,7 @@
 <% content_for :title, @project.name %>
 <% content_for :back_path, projects_path %>
 
-<div class="py-10" data-controller="comments-panel" data-comments-panel-project-id-value="<%= @project.id %>" data-action="tabs:openCommentsPanel->comments-panel#open">
+<div class="py-10" data-controller="comments-panel add-room" data-comments-panel-project-id-value="<%= @project.id %>" data-add-room-project-id-value="<%= @project.id %>" data-action="tabs:openCommentsPanel->comments-panel#open">
   <div class="glass-card rounded-2xl p-6 mb-6">
     <div class="flex items-start justify-between gap-6">
       <div class="flex-1 min-w-0" data-controller="inline-edit">
@@ -110,16 +110,44 @@
       <% end %>
       <% if @is_designer %>
         <span class="ml-auto pl-2">
-          <a href="#" class="btn-primary px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+          <button type="button" data-action="click->add-room#open" class="btn-primary px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
             Add Room
-          </a>
+          </button>
         </span>
       <% end %>
     </div>
     <div class="p-5" data-tabs-target="content"></div>
+  </div>
+
+  <%# Add Room Modal %>
+  <div data-add-room-target="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" data-action="click->add-room#closeOnBackdrop keydown@window->add-room#handleKeydown">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative glass-card rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-semibold text-white">Add New Room</h3>
+        <button type="button" data-action="click->add-room#close" class="p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="mb-6">
+        <label class="block mb-2 text-sm font-medium text-white/80">Room name</label>
+        <input type="text" data-add-room-target="input" placeholder="e.g. Guest bedroom, Office, Nursery" class="input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-white/30 focus:outline-none">
+        <p data-add-room-target="error" class="hidden mt-2 text-sm text-rose-400"></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button" data-action="click->add-room#submit" class="btn-primary flex-1 py-3.5 rounded-xl text-white font-semibold">
+          Create Room
+        </button>
+        <button type="button" data-action="click->add-room#close" class="btn-secondary px-6 py-3.5 rounded-xl text-white/80 font-medium">
+          Cancel
+        </button>
+      </div>
+    </div>
   </div>
 
   <%# Comments slide-out panel %>

@@ -135,7 +135,10 @@ class ProjectsController < ApplicationController
   end
 
   def build_rooms_data
-    room_names = [ "Living room", "Kitchen", "Dining room", "Master bedroom", "Guest bedroom", "Master bathroom" ]
+    default_rooms = [ "Living room", "Kitchen", "Master bedroom", "Master bathroom" ]
+    # Include any custom rooms that exist in the database
+    existing_room_names = @project.rooms.pluck(:name)
+    room_names = (default_rooms + existing_room_names).uniq
     room_names.map do |name|
       room = @project.rooms.find { |r| r.name == name }
       products = room ? room.products.map { |p|
