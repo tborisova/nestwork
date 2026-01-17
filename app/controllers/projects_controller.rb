@@ -56,6 +56,7 @@ class ProjectsController < ApplicationController
                       .find(params[:id])
     @is_designer = current_user.designer_for_project?(@project)
     @rooms_data = build_rooms_data
+    @project_total = @rooms_data.sum { |r| r[:total] }
   end
 
   def new
@@ -137,13 +138,16 @@ class ProjectsController < ApplicationController
     room_names = [ "Living room", "Kitchen", "Dining room", "Master bedroom", "Guest bedroom", "Master bathroom" ]
     room_names.map do |name|
       room = @project.rooms.find { |r| r.name == name }
+      products = room ? room.products.map { |p|
+        { id: p.id, name: p.name, price: p.price, link: p.link, quantity: p.quantity, status: p.status, comments_count: p.comments.size }
+      } : []
+      room_total = products.sum { |p| (p[:price] || 0) * (p[:quantity] || 1) }
       {
         name: name,
         room_id: room&.id,
         comments_count: room ? room.comments.size : 0,
-        products: room ? room.products.map { |p|
-          { id: p.id, name: p.name, price: p.price, link: p.link, quantity: p.quantity, status: p.status, comments_count: p.comments.size }
-        } : [],
+        total: room_total,
+        products: products,
         selections: room ? room.selections.map { |s|
           {
             id: s.id,

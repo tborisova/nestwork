@@ -48,8 +48,11 @@
           when "done" then "#10b981" # emerald-500
           else "#94a3b8" # slate-400
           end %>
-        <div class="mt-2">
+        <div class="mt-2 flex items-center gap-3">
           <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border border-white/10" style="background-color: <%= status_bg %>; color: #ffffff;"><%= status_label %></span>
+          <% if @project_total > 0 %>
+            <span class="text-white/70 text-sm">Total: <span class="text-white font-semibold">$<%= number_with_delimiter(@project_total) %></span></span>
+          <% end %>
         </div>
       </div>
       <div class="text-right w-64 shrink-0">

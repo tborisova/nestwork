@@ -185,9 +185,17 @@ export default class extends Controller {
            </button>`
         : "";
 
+      const roomTotal = roomData ? roomData.total : 0;
+      const roomTotalHtml = roomTotal > 0
+        ? `<div class="text-white font-medium">$${roomTotal.toLocaleString()}</div>`
+        : "";
+
       this.contentTarget.innerHTML = `
         <div class="flex items-center justify-between mb-4">
-          <div class="text-white/80 text-sm">${escaped}</div>
+          <div class="flex items-center gap-4">
+            <div class="text-white/80 text-sm">${escaped}</div>
+            ${roomTotalHtml}
+          </div>
           <div class="flex items-center gap-2">
             ${roomCommentsButton}
             <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-sky-700 hover:bg-sky-600 text-white border border-white/10">
