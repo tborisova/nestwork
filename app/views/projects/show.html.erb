@@ -2,7 +2,7 @@
 <% content_for :back_path, projects_path %>
 
 <div class="py-10" data-controller="comments-panel add-room" data-comments-panel-project-id-value="<%= @project.id %>" data-add-room-project-id-value="<%= @project.id %>" data-action="tabs:openCommentsPanel->comments-panel#open">
-  <div class="glass-card rounded-2xl p-6 mb-6">
+  <div class="glass-card rounded-2xl p-6 mb-6 overflow-visible">
     <div class="flex items-start justify-between gap-6">
       <div class="flex-1 min-w-0" data-controller="inline-edit">
         <%# Display mode %>
@@ -34,7 +34,34 @@
         <% end %>
 
         <div class="mt-4 flex items-center gap-4">
-          <%= project_status_badge(@project.status) %>
+          <% if @is_designer %>
+            <%# Status dropdown for designers %>
+            <div class="relative" data-controller="status-dropdown" data-status-dropdown-project-id-value="<%= @project.id %>" data-status-dropdown-current-status-value="<%= @project.status %>">
+              <button type="button" data-action="click->status-dropdown#toggle" class="flex items-center gap-2 cursor-pointer group">
+                <%= project_status_badge(@project.status) %>
+                <svg class="w-4 h-4 text-white/40 group-hover:text-white/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div data-status-dropdown-target="menu" class="hidden absolute top-full left-0 mt-2 w-48 rounded-xl glass-card border border-white/10 shadow-xl z-50 py-1">
+                <% Project::STATUSES.each do |status| %>
+                  <button type="button"
+                          data-action="click->status-dropdown#selectStatus"
+                          data-status="<%= status %>"
+                          class="w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-2 <%= status == @project.status ? 'text-white bg-white/5' : 'text-white/70' %>">
+                    <%= project_status_badge(status) %>
+                    <% if status == @project.status %>
+                      <svg class="w-4 h-4 text-emerald-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    <% end %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <%= project_status_badge(@project.status) %>
+          <% end %>
           <% if @project_total > 0 %>
             <div class="flex items-center gap-2 text-white/60 text-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,9 +79,53 @@
           <%= render "projects/user_badges", users: @project.designers, type: :designer %>
         </div>
 
-        <div class="text-right">
+        <div class="text-right" data-controller="invite-client" data-invite-client-project-id-value="<%= @project.id %>">
           <p class="text-white/40 text-xs uppercase tracking-wider mb-2">Clients</p>
-          <%= render "projects/user_badges", users: @project.clients, type: :client %>
+          <div class="flex items-center gap-2 justify-end">
+            <%= render "projects/user_badges", users: @project.clients, type: :client %>
+            <% if @is_designer && @available_clients&.any? %>
+              <button type="button" data-action="click->invite-client#open" class="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-all" title="Add client">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+              </button>
+            <% end %>
+          </div>
+
+          <%# Invite Client Modal %>
+          <% if @is_designer && @available_clients&.any? %>
+            <div data-invite-client-target="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" data-action="click->invite-client#closeOnBackdrop keydown@window->invite-client#handleKeydown">
+              <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+              <div class="relative glass-card rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl text-left">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-semibold text-white">Add Client to Project</h3>
+                  <button type="button" data-action="click->invite-client#close" class="p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="mb-6">
+                  <label class="block mb-2 text-sm font-medium text-white/80">Select a client from your firm</label>
+                  <select data-invite-client-target="select" class="input-field w-full px-4 py-3.5 rounded-xl text-white focus:outline-none cursor-pointer">
+                    <option value="">Choose a client...</option>
+                    <% @available_clients.each do |client| %>
+                      <option value="<%= client.id %>"><%= client.name %> (<%= client.email %>)</option>
+                    <% end %>
+                  </select>
+                  <p data-invite-client-target="error" class="hidden mt-2 text-sm text-rose-400"></p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button type="button" data-action="click->invite-client#submit" data-invite-client-target="submitBtn" class="btn-primary flex-1 py-3.5 rounded-xl text-white font-semibold">
+                    Add Client
+                  </button>
+                  <button type="button" data-action="click->invite-client#close" class="btn-secondary px-6 py-3.5 rounded-xl text-white/80 font-medium">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

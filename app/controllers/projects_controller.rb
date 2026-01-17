@@ -3,8 +3,8 @@ class ProjectsController < ApplicationController
 
   before_action :require_login
   before_action :require_designer, only: [:new, :create]
-  before_action :set_accessible_project, only: [:update]
-  before_action :require_project_designer, only: [:update]
+  before_action :set_accessible_project, only: [:update, :add_client]
+  before_action :require_project_designer, only: [:update, :add_client]
 
   def index
     @is_designer = current_user_is_designer?
@@ -23,6 +23,12 @@ class ProjectsController < ApplicationController
     presenter = RoomPresenter.new(@project)
     @rooms_data = presenter.rooms_data
     @project_total = presenter.project_total
+
+    # Load available clients for invite (firm clients not already on project)
+    if @is_designer
+      existing_client_ids = @project.clients.pluck(:id)
+      @available_clients = @project.firm.clients.where.not(id: existing_client_ids).order(:name)
+    end
   end
 
   def new
@@ -55,9 +61,41 @@ class ProjectsController < ApplicationController
 
   def update
     if @project.update(project_params)
-      redirect_to project_path(@project), notice: "Project updated"
+      respond_to do |format|
+        format.html { redirect_to project_path(@project), notice: "Project updated" }
+        format.json { render json: { success: true, status: @project.status } }
+      end
     else
-      redirect_to project_path(@project), alert: @project.errors.full_messages.first || "Could not update project"
+      respond_to do |format|
+        format.html { redirect_to project_path(@project), alert: @project.errors.full_messages.first || "Could not update project" }
+        format.json { render json: { error: @project.errors.full_messages.first || "Could not update project" }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def add_client
+    client_id = params[:client_id].to_i
+
+    # Verify client belongs to the firm
+    unless @project.firm.clients.exists?(id: client_id)
+      return render json: { error: "Client not found in your firm" }, status: :unprocessable_entity
+    end
+
+    # Check if client is already on project
+    if @project.clients.exists?(id: client_id)
+      return render json: { error: "Client is already on this project" }, status: :unprocessable_entity
+    end
+
+    ProjectClient.create!(project: @project, client_id: client_id)
+
+    respond_to do |format|
+      format.html { redirect_to project_path(@project), notice: "Client added to project" }
+      format.json { render json: { success: true } }
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    respond_to do |format|
+      format.html { redirect_to project_path(@project), alert: e.message }
+      format.json { render json: { error: e.message }, status: :unprocessable_entity }
     end
   end
 

@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   root "projects#index"
 
   resources :projects, only: [ :index, :new, :create, :show, :update ] do
+    post :add_client, on: :member
     resources :selections, only: [ :new, :create ] do
       post :select_option, on: :member
       resources :comments, only: [ :index, :create, :update, :destroy ]
