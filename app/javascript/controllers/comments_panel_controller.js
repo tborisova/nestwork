@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { getCSRFToken, escapeHtml, timeAgo } from "utils/dom_helpers";
 
 export default class extends Controller {
   static targets = ["panel", "title", "list", "input", "form"];
@@ -141,11 +142,11 @@ export default class extends Controller {
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
-              <span class="text-white font-medium text-sm">${this.escape(comment.user_name)}</span>
-              <span class="text-white/30 text-xs">${this.timeAgo(comment.created_at)}</span>
+              <span class="text-white font-medium text-sm">${escapeHtml(comment.user_name)}</span>
+              <span class="text-white/30 text-xs">${timeAgo(comment.created_at)}</span>
               ${resolvedBadge}
             </div>
-            <p class="text-white/70 text-sm break-words leading-relaxed">${this.escape(comment.comment)}</p>
+            <p class="text-white/70 text-sm break-words leading-relaxed">${escapeHtml(comment.comment)}</p>
           </div>
           <div class="flex items-center gap-0.5 shrink-0">
             <button type="button" class="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" data-action="click->comments-panel#toggleResolved" data-comment-id="${comment.id}" title="${comment.resolved ? "Mark unresolved" : "Mark resolved"}">
@@ -168,7 +169,7 @@ export default class extends Controller {
         method: "POST",
         body: JSON.stringify({ comment: { comment: commentText } }),
         headers: {
-          "X-CSRF-Token": this.getCSRFToken(),
+          "X-CSRF-Token": getCSRFToken(),
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -211,7 +212,7 @@ export default class extends Controller {
         method: "PATCH",
         body: JSON.stringify({ comment: { resolved: !isResolved } }),
         headers: {
-          "X-CSRF-Token": this.getCSRFToken(),
+          "X-CSRF-Token": getCSRFToken(),
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -235,7 +236,7 @@ export default class extends Controller {
       const response = await fetch(`${this.commentsUrl}/${commentId}`, {
         method: "DELETE",
         headers: {
-          "X-CSRF-Token": this.getCSRFToken(),
+          "X-CSRF-Token": getCSRFToken(),
           Accept: "application/json",
         },
       });
@@ -266,30 +267,4 @@ export default class extends Controller {
     }
   }
 
-  escape(text) {
-    const el = document.createElement("div");
-    el.textContent = text == null ? "" : String(text);
-    return el.innerHTML;
-  }
-
-  timeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-
-    if (seconds < 60) return "just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}d ago`;
-    const months = Math.floor(days / 30);
-    return `${months}mo ago`;
-  }
-
-  getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute("content") : "";
-  }
 }

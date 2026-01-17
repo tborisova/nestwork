@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { getCSRFToken } from "utils/dom_helpers";
 
 export default class extends Controller {
   static targets = ["modal", "input", "error"];
@@ -46,7 +47,7 @@ export default class extends Controller {
         method: "POST",
         body: JSON.stringify({ room: { name: roomName } }),
         headers: {
-          "X-CSRF-Token": this.getCSRFToken(),
+          "X-CSRF-Token": getCSRFToken(),
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -68,10 +69,5 @@ export default class extends Controller {
   showError(message) {
     this.errorTarget.textContent = message;
     this.errorTarget.classList.remove("hidden");
-  }
-
-  getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute("content") : "";
   }
 }

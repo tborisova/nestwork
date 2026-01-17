@@ -1,0 +1,17 @@
+<%# Partial for displaying designer/client badges %>
+<%# locals: users (collection), type (designer/client), empty_text (optional) %>
+
+<% color_class = type == :designer ? "violet" : "pink" %>
+
+<% if users.any? %>
+  <div class="flex flex-wrap gap-1.5 justify-end">
+    <% users.each do |user| %>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-<%= color_class %>-500/20 border border-<%= color_class %>-400/30 px-2.5 py-1 text-xs text-<%= color_class %>-200">
+        <span class="w-1.5 h-1.5 rounded-full bg-<%= color_class %>-400"></span>
+        <%= user.name %>
+      </span>
+    <% end %>
+  </div>
+<% else %>
+  <span class="text-white/30 text-sm"><%= empty_text || "None assigned" %></span>
+<% end %>

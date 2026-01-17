@@ -1,8 +1,10 @@
 class SelectionsController < ApplicationController
+  include ProjectAccessible
+
   before_action :require_login
-  before_action :set_project
+  before_action :set_accessible_project
   before_action :set_room
-  before_action :require_designer, only: [:new, :create]
+  before_action :require_project_designer, only: [:new, :create]
 
   def new
     @selection = @room.selections.build
@@ -24,42 +26,46 @@ class SelectionsController < ApplicationController
     selection = @room.selections.find(params[:id])
     option = selection.selection_options.find(params[:option_id])
 
-    Product.create!(
-      room: @room,
-      name: "#{selection.name} - #{option.name}",
-      link: option.link,
-      price: option.price,
-      quantity: selection.quantity || 1,
-      status: "pending"
-    )
+    ActiveRecord::Base.transaction do
+      Product.create!(
+        room: @room,
+        name: "#{selection.name} - #{option.name}",
+        link: option.link,
+        price: option.price,
+        quantity: selection.quantity || 1,
+        status: "pending"
+      )
 
-    selection.destroy
+      selection.destroy!
+    end
 
     redirect_to project_path(@project), notice: "Product selected and added"
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to project_path(@project), alert: e.message
   end
 
   private
 
-  def require_login
-    redirect_to new_session_path, alert: "You need to sign in first" unless current_user
+  def set_accessible_project
+    @project = find_accessible_project(params[:project_id])
+  rescue ActiveRecord::RecordNotFound
+    handle_project_not_found
   end
 
-  def set_project
-    firm_ids = current_user.firms.select(:id)
-    @project = Project.where(firm_id: firm_ids)
-                      .or(Project.where(id: current_user.client_projects.select(:id)))
-                      .find(params[:project_id])
-  end
-
-  def require_designer
-    unless current_user.designer_for_project?(@project)
-      redirect_to project_path(@project), alert: "Only designers can add products"
-    end
-  end
-
+  # Fixed: No longer creates rooms as a side effect.
+  # Room must exist or be explicitly created first.
   def set_room
-    room_name = params[:room] || "Default"
-    @room = @project.rooms.find_or_create_by!(name: room_name)
+    room_name = params[:room].presence || "Default"
+    @room = @project.rooms.find_by(name: room_name)
+
+    unless @room
+      # Only create room if this is a create/new action and user is a designer
+      if %w[new create].include?(action_name) && designer_for_project?
+        @room = @project.rooms.create!(name: room_name)
+      else
+        redirect_to project_path(@project), alert: "Room '#{room_name}' not found"
+      end
+    end
   end
 
   def selection_params

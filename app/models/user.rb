@@ -1,8 +1,11 @@
 class User < ApplicationRecord
   has_secure_password
 
-  validates :email, presence: true, uniqueness: { case_sensitive: false }
-  validates :name, presence: true
+  validates :email, presence: true,
+                    uniqueness: { case_sensitive: false },
+                    format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }
+  validates :name, presence: true, length: { maximum: 100 }
+  validates :password, length: { minimum: 8 }, allow_nil: true
 
   has_many :firms_designers, class_name: "FirmDesigner", foreign_key: :designer_id
   has_many :firms, through: :firms_designers, source: :firm

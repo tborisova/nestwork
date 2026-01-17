@@ -1,24 +1,15 @@
 class ProductsController < ApplicationController
+  include ProjectAccessible
+
   before_action :require_login
-  before_action :set_project
+  before_action :set_accessible_project
   before_action :set_product
 
   def update_status
     new_status = params[:status]
 
-    # Validate status transition based on role
-    if new_status == "approved"
-      # Both clients and designers can approve
-      unless current_user.designer_for_project?(@project) || current_user.client_for_project?(@project)
-        return redirect_to project_path(@project), alert: "You don't have permission to update this product"
-      end
-    elsif %w[ordered delivered].include?(new_status)
-      # Only designers can mark as ordered or delivered
-      unless current_user.designer_for_project?(@project)
-        return redirect_to project_path(@project), alert: "Only designers can update this status"
-      end
-    else
-      return redirect_to project_path(@project), alert: "Invalid status"
+    unless valid_status_transition?(new_status)
+      return redirect_to project_path(@project), alert: "Invalid status transition"
     end
 
     if @product.update(status: new_status)
@@ -30,18 +21,32 @@ class ProductsController < ApplicationController
 
   private
 
-  def require_login
-    redirect_to new_session_path, alert: "You need to sign in first" unless current_user
-  end
-
-  def set_project
-    firm_ids = current_user.firms.select(:id)
-    @project = Project.where(firm_id: firm_ids)
-                      .or(Project.where(id: current_user.client_projects.select(:id)))
-                      .find(params[:project_id])
+  def set_accessible_project
+    @project = find_accessible_project(params[:project_id])
+  rescue ActiveRecord::RecordNotFound
+    handle_project_not_found
   end
 
   def set_product
-    @product = Product.joins(:room).where(rooms: { project_id: @project.id }).find(params[:id])
+    @product = Product.joins(:room)
+                      .where(rooms: { project_id: @project.id })
+                      .find(params[:id])
+  end
+
+  # Validate status transitions based on user role
+  def valid_status_transition?(new_status)
+    case new_status
+    when "approved"
+      # Both clients and designers can approve
+      designer_for_project? || client_for_project?
+    when "ordered", "delivered"
+      # Only designers can mark as ordered or delivered
+      designer_for_project?
+    when "pending"
+      # Both can reset to pending
+      designer_for_project? || client_for_project?
+    else
+      false
+    end
   end
 end

@@ -3,4 +3,6 @@ class FirmClient < ApplicationRecord
 
   belongs_to :firm
   belongs_to :client, class_name: "User"
+
+  validates :firm_id, uniqueness: { scope: :client_id, message: "client already assigned to this firm" }
 end

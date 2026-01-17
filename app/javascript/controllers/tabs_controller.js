@@ -1,4 +1,11 @@
 import { Controller } from "@hotwired/stimulus";
+import {
+  getCSRFToken,
+  escapeHtml,
+  formatCurrency,
+  getProductStatusClass,
+  getNextStatusAction,
+} from "utils/dom_helpers";
 
 export default class extends Controller {
   static targets = ["tab", "content"];
@@ -51,7 +58,7 @@ export default class extends Controller {
     // Update content
     const roomName = tabEl.dataset.room;
     if (this.hasContentTarget) {
-      const escaped = this.escape(roomName);
+      const escaped = escapeHtml(roomName);
       const projectId = this.projectIdValue;
       const addProductUrl = `/projects/${projectId}/selections/new?room=${encodeURIComponent(roomName)}`;
 
@@ -87,7 +94,7 @@ export default class extends Controller {
                       (p) => `
                     <tr class="group hover:bg-white/[0.02] transition-colors">
                       <td class="py-4">
-                        <span class="text-white font-medium">${this.escape(p.name)}</span>
+                        <span class="text-white font-medium">${escapeHtml(p.name)}</span>
                       </td>
                       <td class="py-4">
                         <span class="text-white/70">${p.price ? "$" + p.price.toLocaleString() : "-"}</span>
@@ -96,12 +103,12 @@ export default class extends Controller {
                         <span class="text-white/70">${p.quantity || 1}</span>
                       </td>
                       <td class="py-4">
-                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${this.statusClass(p.status)}">${this.escape(p.status || "pending")}</span>
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${getProductStatusClass(p.status)}">${escapeHtml(p.status || "pending")}</span>
                       </td>
                       <td class="py-4">
                         <div class="flex items-center justify-end gap-3">
-                          ${p.link ? `<a href="${this.escape(p.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors">View</a>` : ""}
-                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="product" data-id="${p.id}" data-name="${this.escape(p.name)}">
+                          ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium transition-colors">View</a>` : ""}
+                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="product" data-id="${p.id}" data-name="${escapeHtml(p.name)}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
@@ -140,14 +147,14 @@ export default class extends Controller {
                       (o) => `
                       <div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] transition-colors">
                         <div class="flex-1">
-                          <div class="text-white font-medium">${this.escape(o.name)}</div>
+                          <div class="text-white font-medium">${escapeHtml(o.name)}</div>
                           <div class="text-white/50 text-sm mt-0.5 flex items-center gap-2">
                             ${o.price ? `<span>$${o.price.toLocaleString()}</span>` : "<span>No price</span>"}
-                            ${o.link ? `<span class="text-white/30">·</span> <a href="${this.escape(o.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors">View product</a>` : ""}
+                            ${o.link ? `<span class="text-white/30">·</span> <a href="${escapeHtml(o.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors">View product</a>` : ""}
                           </div>
                         </div>
                         <form action="/projects/${projectId}/selections/${s.id}/select_option?option_id=${o.id}&room=${encodeURIComponent(roomName)}" method="post" class="inline ml-4">
-                          <input type="hidden" name="authenticity_token" value="${this.getCSRFToken()}">
+                          <input type="hidden" name="authenticity_token" value="${getCSRFToken()}">
                           <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-medium shadow-lg shadow-emerald-500/20 transition-all">Select</button>
                         </form>
                       </div>
@@ -159,11 +166,11 @@ export default class extends Controller {
                     <div class="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-5">
                       <div class="flex items-center justify-between mb-4">
                         <div>
-                          <div class="text-white font-semibold text-lg">${this.escape(s.name)}</div>
+                          <div class="text-white font-semibold text-lg">${escapeHtml(s.name)}</div>
                           <div class="text-white/50 text-sm mt-1">Quantity: ${s.quantity || 1} · ${s.options.length} option${s.options.length !== 1 ? "s" : ""} available</div>
                         </div>
                         <div class="flex items-center gap-3">
-                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="selection" data-id="${s.id}" data-name="${this.escape(s.name)}">
+                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="selection" data-id="${s.id}" data-name="${escapeHtml(s.name)}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
@@ -302,63 +309,17 @@ export default class extends Controller {
     }
   }
 
-  escape(text) {
-    const el = document.createElement("div");
-    el.textContent = text == null ? "" : String(text);
-    return el.innerHTML;
-  }
-
-  statusClass(status) {
-    switch (status) {
-      case "approved":
-        return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-      case "ordered":
-        return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
-      case "delivered":
-        return "bg-sky-500/20 text-sky-300 border border-sky-500/30";
-      default:
-        return "bg-white/10 text-white/60 border border-white/10";
-    }
-  }
-
   statusActionButton(product, projectId) {
-    const status = product.status || "pending";
-    let nextStatus = null;
-    let buttonLabel = null;
-    let buttonStyle = "";
-
-    // Determine next status and button based on current status and role
-    if (status === "pending") {
-      // Both clients and designers can approve
-      nextStatus = "approved";
-      buttonLabel = "Approve";
-      buttonStyle = "background: linear-gradient(135deg, #10b981 0%, #34d399 100%);";
-    } else if (status === "approved" && this.isDesignerValue) {
-      // Only designers can mark as ordered
-      nextStatus = "ordered";
-      buttonLabel = "Mark Ordered";
-      buttonStyle = "background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);";
-    } else if (status === "ordered" && this.isDesignerValue) {
-      // Only designers can mark as delivered
-      nextStatus = "delivered";
-      buttonLabel = "Mark Delivered";
-      buttonStyle = "background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);";
-    }
-
-    if (!nextStatus) return "";
+    const action = getNextStatusAction(product.status, this.isDesignerValue);
+    if (!action) return "";
 
     return `
       <form action="/projects/${projectId}/products/${product.id}/update_status" method="post" class="inline">
-        <input type="hidden" name="authenticity_token" value="${this.getCSRFToken()}">
-        <input type="hidden" name="status" value="${nextStatus}">
-        <button type="submit" class="text-sm px-3 py-1.5 rounded-lg text-white font-medium shadow-md transition-all hover:shadow-lg" style="${buttonStyle}">${buttonLabel}</button>
+        <input type="hidden" name="authenticity_token" value="${getCSRFToken()}">
+        <input type="hidden" name="status" value="${action.nextStatus}">
+        <button type="submit" class="text-sm px-3 py-1.5 rounded-lg text-white font-medium shadow-md transition-all hover:shadow-lg" style="${action.buttonStyle}">${action.buttonLabel}</button>
       </form>
     `;
-  }
-
-  getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute("content") : "";
   }
 
   openComments(event) {
@@ -401,7 +362,7 @@ export default class extends Controller {
       method: method,
       body: formData,
       headers: {
-        "X-CSRF-Token": this.getCSRFToken(),
+        "X-CSRF-Token": getCSRFToken(),
       },
     })
       .then((response) => {

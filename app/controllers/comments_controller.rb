@@ -1,8 +1,10 @@
 class CommentsController < ApplicationController
+  include ProjectAccessible
+
   before_action :require_login
-  before_action :set_project
+  before_action :set_accessible_project
   before_action :set_commentable
-  before_action :set_comment, only: [ :update, :destroy ]
+  before_action :set_comment, only: [:update, :destroy]
 
   def index
     @comments = @commentable.comments.includes(:user).recent_first
@@ -39,17 +41,8 @@ class CommentsController < ApplicationController
 
   private
 
-  def require_login
-    unless current_user
-      render json: { error: "You need to sign in first" }, status: :unauthorized
-    end
-  end
-
-  def set_project
-    firm_ids = current_user.firms.select(:id)
-    @project = Project.where(firm_id: firm_ids)
-                      .or(Project.where(id: current_user.client_projects.select(:id)))
-                      .find(params[:project_id])
+  def set_accessible_project
+    @project = find_accessible_project(params[:project_id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Project not found" }, status: :not_found
   end
@@ -72,9 +65,7 @@ class CommentsController < ApplicationController
 
   def commentable_belongs_to_project?
     case @commentable
-    when Product
-      @commentable.room.project_id == @project.id
-    when Selection
+    when Product, Selection
       @commentable.room.project_id == @project.id
     when Room
       @commentable.project_id == @project.id
