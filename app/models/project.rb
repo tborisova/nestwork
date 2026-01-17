@@ -6,4 +6,6 @@ class Project < ApplicationRecord
 
   has_many :clients, through: :projects_clients, class_name: 'User', inverse_of: :client_projects
   has_many :designers, through: :projects_designers, class_name: 'User', inverse_of: :designer_projects
+
+  has_many :rooms, dependent: :destroy
 end

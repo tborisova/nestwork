@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_16_183828) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_17_075105) do
   create_table "comments", force: :cascade do |t|
     t.integer "product_id"
     t.text "comment"
@@ -83,6 +83,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_16_183828) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "selection_options", force: :cascade do |t|
+    t.integer "selection_id", null: false
+    t.string "name"
+    t.string "link"
+    t.integer "price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["selection_id"], name: "index_selection_options_on_selection_id"
+  end
+
+  create_table "selections", force: :cascade do |t|
+    t.integer "room_id", null: false
+    t.string "name"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_selections_on_room_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "password_salt", null: false
@@ -92,4 +111,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_16_183828) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
+
+  add_foreign_key "selection_options", "selections"
+  add_foreign_key "selections", "rooms"
 end

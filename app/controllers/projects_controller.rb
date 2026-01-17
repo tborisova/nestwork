@@ -1,16 +1,22 @@
 class ProjectsController < ApplicationController
   before_action :require_login
+  before_action :require_designer, only: [:new, :create]
 
   def index
     firm_ids = current_user.firms.select(:id)
-    @filter_designers = User.joins("INNER JOIN firms_designers ON firms_designers.designer_id = users.id")
-                            .where("firms_designers.firm_id IN (?)", firm_ids)
+    @is_designer = current_user.firms.exists?
+
+    if @is_designer
+      @filter_designers = User.joins("INNER JOIN firms_designers ON firms_designers.designer_id = users.id")
+                              .where("firms_designers.firm_id IN (?)", firm_ids)
+                              .distinct.order(:name)
+      @filter_clients = User.joins("INNER JOIN firms_clients ON firms_clients.client_id = users.id")
+                            .where("firms_clients.firm_id IN (?)", firm_ids)
                             .distinct.order(:name)
-    @filter_clients = User.joins("INNER JOIN firms_clients ON firms_clients.client_id = users.id")
-                          .where("firms_clients.firm_id IN (?)", firm_ids)
-                          .distinct.order(:name)
+    end
 
     projects = Project.where(firm_id: firm_ids)
+                      .or(Project.where(id: current_user.client_projects.select(:id)))
     if params[:status].present?
       projects = projects.where(status: params[:status])
     end
@@ -30,12 +36,24 @@ class ProjectsController < ApplicationController
       end
     end
 
-    @projects = projects.includes(:designers, :clients).distinct.order(created_at: :desc)
+    status_order = Arel.sql("CASE status
+      WHEN 'waiting_for_approval' THEN 1
+      WHEN 'new' THEN 2
+      WHEN 'in_progress' THEN 3
+      WHEN 'done' THEN 4
+      ELSE 5
+    END")
+    @projects = projects.includes(:designers, :clients).distinct.order(status_order, created_at: :desc)
   end
 
   def show
     firm_ids = current_user.firms.select(:id)
-    @project = Project.includes(:designers, :clients).where(firm_id: firm_ids).find(params[:id])
+    @project = Project.includes(:designers, :clients, rooms: [:products, { selections: :selection_options }])
+                      .where(firm_id: firm_ids)
+                      .or(Project.where(id: current_user.client_projects.select(:id)))
+                      .find(params[:id])
+    @is_designer = current_user.designer_for_project?(@project)
+    @rooms_data = build_rooms_data
   end
 
   def new
@@ -82,7 +100,34 @@ class ProjectsController < ApplicationController
     redirect_to new_session_path, alert: "You need to sign in first" unless current_user
   end
 
+  def require_designer
+    unless current_user.firms.exists?
+      redirect_to projects_path, alert: "Only designers can create projects"
+    end
+  end
+
   def project_params
     params.require(:project).permit(:name)
+  end
+
+  def build_rooms_data
+    room_names = ["Living room", "Kitchen", "Dining room", "Master bedroom", "Guest bedroom", "Master bathroom"]
+    room_names.map do |name|
+      room = @project.rooms.find { |r| r.name == name }
+      {
+        name: name,
+        products: room ? room.products.map { |p|
+          { id: p.id, name: p.name, price: p.price, link: p.link, quantity: p.quantity, status: p.status }
+        } : [],
+        selections: room ? room.selections.map { |s|
+          {
+            id: s.id,
+            name: s.name,
+            quantity: s.quantity,
+            options: s.selection_options.map { |o| { id: o.id, name: o.name, price: o.price, link: o.link } }
+          }
+        } : []
+      }
+    end
   end
 end

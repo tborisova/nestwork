@@ -29,4 +29,12 @@ class User < ApplicationRecord
     self.password_salt = SecureRandom.hex(16)
     self.password_hash = User.compute_hash(password_salt, plaintext_password)
   end
+
+  def designer_for_project?(project)
+    designer_projects.exists?(project.id)
+  end
+
+  def client_for_project?(project)
+    client_projects.exists?(project.id)
+  end
 end

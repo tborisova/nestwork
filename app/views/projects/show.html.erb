@@ -1,4 +1,5 @@
 <% content_for :title, @project.name %>
+<% content_for :back_path, projects_path %>
 
 <div class="container mx-auto px-4 py-6">
   <div class="rounded-lg border border-white/10 bg-white/5 p-4 mb-4">
@@ -54,20 +55,21 @@
     </div>
   </div>
 
-  <div class="rounded-lg border border-white/10 bg-white/5 p-2" data-controller="tabs">
+  <div class="rounded-lg border border-white/10 bg-white/5 p-2" data-controller="tabs" data-tabs-project-id-value="<%= @project.id %>" data-tabs-rooms-value="<%= @rooms_data.to_json %>" data-tabs-is-designer-value="<%= @is_designer %>">
     <div class="flex items-center gap-2 border-b border-white/10 pb-2">
-      <% rooms = ["Living room","Kitchen","Dining room","Master bedroom","Guest bedroom","Master bathroom"] %>
-      <% rooms.each_with_index do |room, idx| %>
+      <% @rooms_data.each_with_index do |room, idx| %>
         <button type="button"
                 class="px-3 py-1.5 rounded-md text-sm border border-white/10"
                 data-tabs-target="tab"
                 data-action="click->tabs#select"
-                data-room="<%= room %>"
-                data-active="<%= (idx == 0).to_s %>"><%= room %></button>
+                data-room="<%= room[:name] %>"
+                data-active="<%= (idx == 0).to_s %>"><%= room[:name] %></button>
       <% end %>
-      <span class="ml-auto">
-        <a href="#" class="px-3 py-1.5 rounded-md text-sm bg-purple-950 hover:bg-purple-900 text-white border border-white/10">Add new room</a>
-      </span>
+      <% if @is_designer %>
+        <span class="ml-auto">
+          <a href="#" class="px-3 py-1.5 rounded-md text-sm bg-purple-950 hover:bg-purple-900 text-white border border-white/10">Add new room</a>
+        </span>
+      <% end %>
     </div>
     <div class="p-3 text-white/80 text-sm" data-tabs-target="content"></div>
   </div>
