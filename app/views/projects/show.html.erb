@@ -4,8 +4,34 @@
 <div class="container mx-auto px-4 py-6" data-controller="comments-panel" data-comments-panel-project-id-value="<%= @project.id %>" data-action="tabs:openCommentsPanel->comments-panel#open">
   <div class="rounded-lg border border-white/10 bg-white/5 p-4 mb-4">
     <div class="flex items-start justify-between gap-4">
-      <div class="flex-1 min-w-0">
-        <h1 class="text-xl font-semibold text-white break-words"><%= @project.name %></h1>
+      <div class="flex-1 min-w-0" data-controller="inline-edit">
+        <%# Display mode %>
+        <div data-inline-edit-target="display" class="flex items-center gap-2">
+          <h1 class="text-xl font-semibold text-white break-words"><%= @project.name %></h1>
+          <% if @is_designer %>
+            <button type="button" data-action="click->inline-edit#edit" class="p-1 rounded hover:bg-white/10 text-white/40 hover:text-white" title="Edit title">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+              </svg>
+            </button>
+          <% end %>
+        </div>
+        <%# Edit mode %>
+        <%= form_with model: @project, method: :patch, class: "hidden", data: { inline_edit_target: "form" } do |f| %>
+          <div class="flex items-center gap-2">
+            <%= f.text_field :name, value: @project.name, class: "flex-1 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-white text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-fuchsia-400", data: { inline_edit_target: "input", action: "keydown->inline-edit#submitOnEnter" } %>
+            <button type="submit" class="p-1.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white" title="Save">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </button>
+            <button type="button" data-action="click->inline-edit#cancel" class="p-1.5 rounded bg-white/10 hover:bg-white/20 text-white" title="Cancel">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        <% end %>
         <% status_label =
           case @project.status.to_s
           when "new" then "New"

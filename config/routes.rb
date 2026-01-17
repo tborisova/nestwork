@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "sessions#new"
 
-  resources :projects, only: [ :index, :new, :create, :show ] do
+  resources :projects, only: [ :index, :new, :create, :show, :update ] do
     resources :selections, only: [ :new, :create ] do
       post :select_option, on: :member
       resources :comments, only: [ :index, :create, :update, :destroy ]

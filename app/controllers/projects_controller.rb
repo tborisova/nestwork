@@ -1,6 +1,8 @@
 class ProjectsController < ApplicationController
   before_action :require_login
-  before_action :require_designer, only: [:new, :create]
+  before_action :require_designer, only: [ :new, :create ]
+  before_action :set_project, only: [ :update ]
+  before_action :require_project_designer, only: [ :update ]
 
   def index
     firm_ids = current_user.firms.select(:id)
@@ -94,7 +96,28 @@ class ProjectsController < ApplicationController
     render :new, status: :unprocessable_entity
   end
 
+  def update
+    if @project.update(project_params)
+      redirect_to project_path(@project), notice: "Project updated"
+    else
+      redirect_to project_path(@project), alert: @project.errors.full_messages.first || "Could not update project"
+    end
+  end
+
   private
+
+  def set_project
+    firm_ids = current_user.firms.select(:id)
+    @project = Project.where(firm_id: firm_ids)
+                      .or(Project.where(id: current_user.client_projects.select(:id)))
+                      .find(params[:id])
+  end
+
+  def require_project_designer
+    unless current_user.designer_for_project?(@project)
+      redirect_to project_path(@project), alert: "Only designers can edit projects"
+    end
+  end
 
   def require_login
     redirect_to new_session_path, alert: "You need to sign in first" unless current_user
