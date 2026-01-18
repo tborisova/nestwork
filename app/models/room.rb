@@ -15,11 +15,4 @@ class Room < ApplicationRecord
   validates :name, uniqueness: { scope: :project_id, message: "already exists in this project" }
   validates :status, presence: true, inclusion: { in: STATUSES }
 
-  # Scopes
-  scope :by_status, ->(status) { where(status: status) if status.present? }
-
-  # Calculate total cost for all products in this room
-  def total_cost
-    products.sum { |p| (p.price || 0) * (p.quantity || 1) }
-  end
 end

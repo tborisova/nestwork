@@ -4,8 +4,6 @@ class Comment < ApplicationRecord
 
   validates :comment, presence: true, length: { maximum: 5000 }
 
-  scope :unresolved, -> { where(resolved: false) }
-  scope :resolved, -> { where(resolved: true) }
   scope :recent_first, -> { order(created_at: :desc) }
 
   # Default resolved to false

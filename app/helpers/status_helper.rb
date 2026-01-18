@@ -18,14 +18,6 @@ module StatusHelper
     "delivered" => { label: "Delivered", css_class: "bg-sky-500/20 text-sky-300 border border-sky-500/30" }
   }.freeze
 
-  # Room status configuration (same as project for now)
-  ROOM_STATUSES = {
-    "new" => { label: "New", css_class: "badge-new" },
-    "in_progress" => { label: "In Progress", css_class: "badge-progress" },
-    "review" => { label: "Review", css_class: "badge-waiting" },
-    "completed" => { label: "Completed", css_class: "badge-done" }
-  }.freeze
-
   # Render a project status badge
   def project_status_badge(status)
     config = PROJECT_STATUSES[status.to_s] || { label: status.to_s.humanize, css_class: "bg-white/20" }
@@ -36,41 +28,5 @@ module StatusHelper
   def product_status_badge(status)
     config = PRODUCT_STATUSES[status.to_s] || { label: status.to_s.humanize, css_class: "bg-white/10 text-white/60" }
     content_tag(:span, config[:label], class: "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold #{config[:css_class]}")
-  end
-
-  # Render a room status badge
-  def room_status_badge(status)
-    config = ROOM_STATUSES[status.to_s] || { label: status.to_s.humanize, css_class: "bg-white/20" }
-    content_tag(:span, config[:label], class: "badge text-white #{config[:css_class]}")
-  end
-
-  # Get status label for a project
-  def project_status_label(status)
-    PROJECT_STATUSES.dig(status.to_s, :label) || status.to_s.humanize
-  end
-
-  # Get status CSS class for a project
-  def project_status_class(status)
-    PROJECT_STATUSES.dig(status.to_s, :css_class) || "bg-white/20"
-  end
-
-  # Get status label for a product
-  def product_status_label(status)
-    PRODUCT_STATUSES.dig(status.to_s, :label) || status.to_s.humanize
-  end
-
-  # Get status CSS class for a product
-  def product_status_class(status)
-    PRODUCT_STATUSES.dig(status.to_s, :css_class) || "bg-white/10 text-white/60"
-  end
-
-  # Options for project status select
-  def project_status_options
-    PROJECT_STATUSES.map { |value, config| [config[:label], value] }
-  end
-
-  # Options for product status select
-  def product_status_options
-    PRODUCT_STATUSES.map { |value, config| [config[:label], value] }
   end
 end

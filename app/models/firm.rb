@@ -1,6 +1,4 @@
 class Firm < ApplicationRecord
-  belongs_to :owner, class_name: "User", optional: true
-
   has_many :projects, dependent: :destroy
 
   has_many :firms_designers, class_name: "FirmDesigner", dependent: :destroy

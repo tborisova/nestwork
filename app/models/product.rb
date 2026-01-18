@@ -12,27 +12,4 @@ class Product < ApplicationRecord
   validates :quantity, numericality: { greater_than: 0, only_integer: true }, allow_nil: true
   validates :link, length: { maximum: 2048 }, allow_blank: true
 
-  # Scopes
-  scope :by_status, ->(status) { where(status: status) if status.present? }
-  scope :pending, -> { where(status: "pending") }
-  scope :approved, -> { where(status: "approved") }
-  scope :ordered, -> { where(status: "ordered") }
-  scope :delivered, -> { where(status: "delivered") }
-
-  # Calculate total price for this product
-  def total_price
-    (price || 0) * (quantity || 1)
-  end
-
-  # Check if status can transition to the given status
-  def can_transition_to?(new_status)
-    valid_transitions = {
-      "pending" => %w[approved rejected],
-      "approved" => %w[ordered pending],
-      "rejected" => %w[pending],
-      "ordered" => %w[delivered approved],
-      "delivered" => %w[ordered]
-    }
-    valid_transitions[status]&.include?(new_status)
-  end
 end
