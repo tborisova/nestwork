@@ -9,7 +9,7 @@ import {
 
 export default class extends Controller {
   static targets = ["tab", "content"];
-  static values = { projectId: Number, rooms: Array, isDesigner: Boolean };
+  static values = { projectId: Number, rooms: Array, isDesigner: Boolean, projectStatus: String };
 
   connect() {
     // Ensure an initial active tab
@@ -211,7 +211,7 @@ export default class extends Controller {
         `;
       }
 
-      const addProductButton = this.isDesignerValue
+      const addProductButton = this.isDesignerValue && this.projectStatusValue !== "done"
         ? `<a href="${addProductUrl}" class="btn-primary-small inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm shadow-lg shadow-purple-500/20" style="background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
