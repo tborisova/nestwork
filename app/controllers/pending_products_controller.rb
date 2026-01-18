@@ -26,22 +26,16 @@ class PendingProductsController < ApplicationController
     pending_product = @room.pending_products.find(params[:id])
     option = pending_product.pending_product_options.find(params[:option_id])
 
-    ActiveRecord::Base.transaction do
-      Product.create!(
-        room: @room,
-        name: "#{pending_product.name} - #{option.name}",
-        link: option.link,
-        price: option.price,
-        quantity: pending_product.quantity || 1,
-        status: "pending"
-      )
+    result = PendingProducts::SelectOptionService.new(
+      pending_product: pending_product,
+      option: option
+    ).call
 
-      pending_product.destroy!
+    if result.success?
+      redirect_to project_path(@project), notice: "Product selected and added"
+    else
+      redirect_to project_path(@project), alert: result.error
     end
-
-    redirect_to project_path(@project), notice: "Product selected and added"
-  rescue ActiveRecord::RecordInvalid => e
-    redirect_to project_path(@project), alert: e.message
   end
 
   private

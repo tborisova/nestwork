@@ -7,8 +7,9 @@ class ProductsController < ApplicationController
 
   def update_status
     new_status = params[:status]
+    policy = Products::StatusTransitionPolicy.new(user: current_user, project: @project)
 
-    unless valid_status_transition?(new_status)
+    unless policy.allowed?(new_status)
       return redirect_to project_path(@project), alert: "Invalid status transition"
     end
 
@@ -31,22 +32,5 @@ class ProductsController < ApplicationController
     @product = Product.joins(:room)
                       .where(rooms: { project_id: @project.id })
                       .find(params[:id])
-  end
-
-  # Validate status transitions based on user role
-  def valid_status_transition?(new_status)
-    case new_status
-    when "approved"
-      # Both clients and designers can approve
-      designer_for_project? || client_for_project?
-    when "ordered", "delivered"
-      # Only designers can mark as ordered or delivered
-      designer_for_project?
-    when "pending"
-      # Both can reset to pending
-      designer_for_project? || client_for_project?
-    else
-      false
-    end
   end
 end

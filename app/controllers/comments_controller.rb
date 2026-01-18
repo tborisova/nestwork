@@ -8,7 +8,7 @@ class CommentsController < ApplicationController
 
   def index
     @comments = @commentable.comments.includes(:user).recent_first
-    render json: @comments.map { |c| comment_json(c) }
+    render json: CommentPresenter.collection(@comments, current_user: current_user)
   end
 
   def create
@@ -16,7 +16,7 @@ class CommentsController < ApplicationController
     @comment.user = current_user
 
     if @comment.save
-      render json: comment_json(@comment), status: :created
+      render json: CommentPresenter.new(@comment, current_user: current_user).as_json, status: :created
     else
       render json: { errors: @comment.errors.full_messages }, status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class CommentsController < ApplicationController
 
   def update
     if @comment.update(comment_update_params)
-      render json: comment_json(@comment)
+      render json: CommentPresenter.new(@comment, current_user: current_user).as_json
     else
       render json: { errors: @comment.errors.full_messages }, status: :unprocessable_entity
     end
@@ -48,30 +48,9 @@ class CommentsController < ApplicationController
   end
 
   def set_commentable
-    @commentable = find_commentable
+    @commentable = Comments::CommentableFinder.new(params).call
     return render json: { error: "Item not found" }, status: :not_found unless @commentable
-    return render json: { error: "Item not found" }, status: :not_found unless commentable_belongs_to_project?
-  end
-
-  def find_commentable
-    if params[:product_id]
-      Product.find_by(id: params[:product_id])
-    elsif params[:pending_product_id]
-      PendingProduct.find_by(id: params[:pending_product_id])
-    elsif params[:room_id]
-      Room.find_by(id: params[:room_id])
-    end
-  end
-
-  def commentable_belongs_to_project?
-    case @commentable
-    when Product, PendingProduct
-      @commentable.room.project_id == @project.id
-    when Room
-      @commentable.project_id == @project.id
-    else
-      false
-    end
+    return render json: { error: "Item not found" }, status: :not_found unless Comments::CommentableFinder.belongs_to_project?(@commentable, @project)
   end
 
   def set_comment
@@ -86,17 +65,5 @@ class CommentsController < ApplicationController
 
   def comment_update_params
     params.require(:comment).permit(:resolved)
-  end
-
-  def comment_json(comment)
-    {
-      id: comment.id,
-      comment: comment.comment,
-      resolved: comment.resolved || false,
-      user_id: comment.user_id,
-      user_name: comment.user.name,
-      created_at: comment.created_at.iso8601,
-      can_delete: comment.user_id == current_user.id
-    }
   end
 end
