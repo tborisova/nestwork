@@ -28,7 +28,7 @@ class ProjectsController < ApplicationController
 
   def new
     @project = Project.new
-    @firm = current_user.firms.first
+    @firm = current_user.firm
     return redirect_to projects_path, alert: "You need to be part of a firm to create a project" unless @firm
 
     @clients = @firm.clients
@@ -36,7 +36,7 @@ class ProjectsController < ApplicationController
   end
 
   def create
-    @firm = current_user.firms.first
+    @firm = current_user.firm
     return redirect_to projects_path, alert: "You need to be part of a firm to create a project" unless @firm
 
     result = Projects::CreateService.new(firm: @firm, params: params).call
@@ -95,14 +95,12 @@ class ProjectsController < ApplicationController
   private
 
   def load_filter_options
-    firm_ids = current_user.firms.select(:id)
+    firm_id = current_user.firm_id
 
-    @filter_designers = User.joins(:firms_designers)
-                            .where(firms_designers: { firm_id: firm_ids })
-                            .distinct.order(:name)
+    @filter_designers = User.where(firm_id: firm_id).order(:name)
 
     @filter_clients = User.joins(:firms_clients)
-                          .where(firms_clients: { firm_id: firm_ids })
+                          .where(firms_clients: { firm_id: firm_id })
                           .distinct.order(:name)
   end
 

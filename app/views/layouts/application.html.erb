@@ -51,7 +51,7 @@
                 <span class="font-semibold text-white">Nestwork</span>
               </a>
             <% end %>
-            <% if (firm = current_user.firms.first) %>
+            <% if (firm = current_user.firm) %>
               <span class="text-white/80 font-medium pl-6 border-l border-white/10"><%= firm.name %></span>
             <% end %>
           </div>

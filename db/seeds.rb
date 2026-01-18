@@ -7,7 +7,7 @@
 puts "Seeding database..."
 
 # Clear existing data in development
-if Rails.env.development?
+# if Rails.env.development?
   puts "Clearing existing data..."
   Comment.destroy_all
   PendingProductOption.destroy_all
@@ -18,10 +18,9 @@ if Rails.env.development?
   ProjectDesigner.destroy_all
   Project.destroy_all
   FirmClient.destroy_all
-  FirmDesigner.destroy_all
   Firm.destroy_all
   User.destroy_all
-end
+# end
 
 # ===================
 # USERS - Designers
@@ -77,21 +76,21 @@ firms_data = [
   {
     name: "Luxe Interiors",
     website_url: "https://luxeinteriors.com",
-    owner: designer_users[0],
+    owner_id: designer_users[0].id,
     designers: [designer_users[0], designer_users[1]],
     clients: [client_users[0], client_users[1], client_users[2], client_users[3]]
   },
   {
     name: "Modern Spaces Co",
     website_url: "https://modernspaces.co",
-    owner: designer_users[2],
+    owner_id: designer_users[2].id,
     designers: [designer_users[2], designer_users[3]],
     clients: [client_users[4], client_users[5]]
   },
   {
     name: "Cozy Designs",
     website_url: "https://cozydesigns.net",
-    owner: designer_users[4],
+    owner_id: designer_users[4].id,
     designers: [designer_users[4]],
     clients: [client_users[6], client_users[7]]
   }
@@ -101,11 +100,12 @@ firms = firms_data.map do |data|
   firm = Firm.create!(
     name: data[:name],
     website_url: data[:website_url],
-    owner: data[:owner]
+    owner_id: data[:owner]&.id
   )
 
+  # Associate designers with the firm (designers can only belong to one firm)
   data[:designers].each do |designer|
-    FirmDesigner.create!(firm: firm, designer: designer)
+    designer.update!(firm: firm)
   end
 
   data[:clients].each do |client|
@@ -418,8 +418,8 @@ puts "-" * 50
 puts ""
 puts "DESIGNERS:"
 designer_users.each do |user|
-  firm = user.firms.first
-  puts "  #{user.email} - #{firm&.name || 'No firm'}"
+  user.reload
+  puts "  #{user.email} - #{user.firm&.name || 'No firm'}"
 end
 puts ""
 puts "CLIENTS:"

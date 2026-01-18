@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_18_000000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -67,16 +67,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
     t.index ["client_id"], name: "index_firms_clients_on_client_id"
     t.index ["firm_id", "client_id"], name: "index_firms_clients_unique", unique: true
     t.index ["firm_id"], name: "index_firms_clients_on_firm_id"
-  end
-
-  create_table "firms_designers", force: :cascade do |t|
-    t.integer "firm_id", null: false
-    t.integer "designer_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["designer_id"], name: "index_firms_designers_on_designer_id"
-    t.index ["firm_id", "designer_id"], name: "index_firms_designers_unique", unique: true
-    t.index ["firm_id"], name: "index_firms_designers_on_firm_id"
   end
 
   create_table "pending_product_options", force: :cascade do |t|
@@ -154,7 +144,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "password_digest", null: false
+    t.integer "firm_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["firm_id"], name: "index_users_on_firm_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -163,8 +155,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
   add_foreign_key "firms", "users", column: "owner_id"
   add_foreign_key "firms_clients", "firms"
   add_foreign_key "firms_clients", "users", column: "client_id"
-  add_foreign_key "firms_designers", "firms"
-  add_foreign_key "firms_designers", "users", column: "designer_id"
   add_foreign_key "pending_product_options", "pending_products"
   add_foreign_key "pending_products", "rooms"
   add_foreign_key "products", "rooms"
@@ -174,4 +164,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
   add_foreign_key "projects_designers", "projects"
   add_foreign_key "projects_designers", "users", column: "designer_id"
   add_foreign_key "rooms", "projects"
+  add_foreign_key "users", "firms"
 end
