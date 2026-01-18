@@ -56,8 +56,8 @@ class CommentsController < ApplicationController
   def find_commentable
     if params[:product_id]
       Product.find_by(id: params[:product_id])
-    elsif params[:selection_id]
-      Selection.find_by(id: params[:selection_id])
+    elsif params[:pending_product_id]
+      PendingProduct.find_by(id: params[:pending_product_id])
     elsif params[:room_id]
       Room.find_by(id: params[:room_id])
     end
@@ -65,7 +65,7 @@ class CommentsController < ApplicationController
 
   def commentable_belongs_to_project?
     case @commentable
-    when Product, Selection
+    when Product, PendingProduct
       @commentable.room.project_id == @project.id
     when Room
       @commentable.project_id == @project.id

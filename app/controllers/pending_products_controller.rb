@@ -1,4 +1,4 @@
-class SelectionsController < ApplicationController
+class PendingProductsController < ApplicationController
   include ProjectAccessible
 
   before_action :require_login
@@ -7,36 +7,36 @@ class SelectionsController < ApplicationController
   before_action :require_project_designer, only: [:new, :create]
 
   def new
-    @selection = @room.selections.build
-    6.times { @selection.selection_options.build }
+    @pending_product = @room.pending_products.build
+    6.times { @pending_product.pending_product_options.build }
   end
 
   def create
-    @selection = @room.selections.build(selection_params)
+    @pending_product = @room.pending_products.build(pending_product_params)
 
-    if @selection.save
-      redirect_to project_path(@project), notice: "Selection added"
+    if @pending_product.save
+      redirect_to project_path(@project), notice: "Pending product added"
     else
-      flash.now[:alert] = @selection.errors.full_messages.first || "Could not add selection"
+      flash.now[:alert] = @pending_product.errors.full_messages.first || "Could not add pending product"
       render :new, status: :unprocessable_entity
     end
   end
 
   def select_option
-    selection = @room.selections.find(params[:id])
-    option = selection.selection_options.find(params[:option_id])
+    pending_product = @room.pending_products.find(params[:id])
+    option = pending_product.pending_product_options.find(params[:option_id])
 
     ActiveRecord::Base.transaction do
       Product.create!(
         room: @room,
-        name: "#{selection.name} - #{option.name}",
+        name: "#{pending_product.name} - #{option.name}",
         link: option.link,
         price: option.price,
-        quantity: selection.quantity || 1,
+        quantity: pending_product.quantity || 1,
         status: "pending"
       )
 
-      selection.destroy!
+      pending_product.destroy!
     end
 
     redirect_to project_path(@project), notice: "Product selected and added"
@@ -68,11 +68,11 @@ class SelectionsController < ApplicationController
     end
   end
 
-  def selection_params
-    params.require(:selection).permit(
+  def pending_product_params
+    params.require(:pending_product).permit(
       :name,
       :quantity,
-      selection_options_attributes: [:id, :name, :link, :price, :_destroy]
+      pending_product_options_attributes: [:id, :name, :link, :price, :_destroy]
     )
   end
 end

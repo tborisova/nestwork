@@ -60,11 +60,11 @@ export default class extends Controller {
     if (this.hasContentTarget) {
       const escaped = escapeHtml(roomName);
       const projectId = this.projectIdValue;
-      const addProductUrl = `/projects/${projectId}/selections/new?room=${encodeURIComponent(roomName)}`;
+      const addProductUrl = `/projects/${projectId}/pending_products/new?room=${encodeURIComponent(roomName)}`;
 
       const roomData = this.roomsValue.find((r) => r.name === roomName);
       const products = roomData ? roomData.products : [];
-      const selections = roomData ? roomData.selections : [];
+      const pendingProducts = roomData ? roomData.pending_products : [];
 
       // Products section (selected items)
       let productsHtml = "";
@@ -128,19 +128,19 @@ export default class extends Controller {
         `;
       }
 
-      // Selections section (pending choices)
-      let selectionsHtml = "";
-      if (selections.length > 0) {
-        selectionsHtml = `
+      // Pending Products section (pending choices)
+      let pendingProductsHtml = "";
+      if (pendingProducts.length > 0) {
+        pendingProductsHtml = `
           <div>
             <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
               <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              Pending Selections
+              Pending Products
             </h3>
             <div class="space-y-4">
-              ${selections
+              ${pendingProducts
                 .map((s) => {
                   const optionsHtml = s.options
                     .map(
@@ -153,7 +153,7 @@ export default class extends Controller {
                             ${o.link ? `<span class="text-white/30">·</span> <a href="${escapeHtml(o.link)}" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors">View product</a>` : ""}
                           </div>
                         </div>
-                        <form action="/projects/${projectId}/selections/${s.id}/select_option?option_id=${o.id}&room=${encodeURIComponent(roomName)}" method="post" class="inline ml-4">
+                        <form action="/projects/${projectId}/pending_products/${s.id}/select_option?option_id=${o.id}&room=${encodeURIComponent(roomName)}" method="post" class="inline ml-4">
                           <input type="hidden" name="authenticity_token" value="${getCSRFToken()}">
                           <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-medium shadow-lg shadow-emerald-500/20 transition-all">Select</button>
                         </form>
@@ -170,7 +170,7 @@ export default class extends Controller {
                           <div class="text-white/50 text-sm mt-1">Quantity: ${s.quantity || 1} · ${s.options.length} option${s.options.length !== 1 ? "s" : ""} available</div>
                         </div>
                         <div class="flex items-center gap-3">
-                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="selection" data-id="${s.id}" data-name="${escapeHtml(s.name)}">
+                          <button type="button" class="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors" data-action="click->tabs#openComments" data-type="pending_product" data-id="${s.id}" data-name="${escapeHtml(s.name)}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
@@ -198,7 +198,7 @@ export default class extends Controller {
 
       // Empty state
       let emptyHtml = "";
-      if (products.length === 0 && selections.length === 0) {
+      if (products.length === 0 && pendingProducts.length === 0) {
         emptyHtml = `
           <div class="text-center py-12">
             <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
@@ -303,7 +303,7 @@ export default class extends Controller {
           </div>
         </div>
         ${productsHtml}
-        ${selectionsHtml}
+        ${pendingProductsHtml}
         ${emptyHtml}
       `;
     }

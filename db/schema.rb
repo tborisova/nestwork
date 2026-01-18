@@ -79,6 +79,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
     t.index ["firm_id"], name: "index_firms_designers_on_firm_id"
   end
 
+  create_table "pending_product_options", force: :cascade do |t|
+    t.integer "pending_product_id", null: false
+    t.string "name"
+    t.string "link"
+    t.integer "price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pending_product_id"], name: "index_pending_product_options_on_pending_product_id"
+  end
+
+  create_table "pending_products", force: :cascade do |t|
+    t.integer "room_id", null: false
+    t.string "name"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_pending_products_on_room_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.integer "room_id", null: false
     t.string "name"
@@ -129,25 +148,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
     t.index ["project_id"], name: "index_rooms_on_project_id"
   end
 
-  create_table "selection_options", force: :cascade do |t|
-    t.integer "selection_id", null: false
-    t.string "name"
-    t.string "link"
-    t.integer "price"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["selection_id"], name: "index_selection_options_on_selection_id"
-  end
-
-  create_table "selections", force: :cascade do |t|
-    t.integer "room_id", null: false
-    t.string "name"
-    t.integer "quantity"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["room_id"], name: "index_selections_on_room_id"
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "name", null: false
@@ -165,6 +165,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
   add_foreign_key "firms_clients", "users", column: "client_id"
   add_foreign_key "firms_designers", "firms"
   add_foreign_key "firms_designers", "users", column: "designer_id"
+  add_foreign_key "pending_product_options", "pending_products"
+  add_foreign_key "pending_products", "rooms"
   add_foreign_key "products", "rooms"
   add_foreign_key "projects", "firms"
   add_foreign_key "projects_clients", "projects"
@@ -172,6 +174,4 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_17_200001) do
   add_foreign_key "projects_designers", "projects"
   add_foreign_key "projects_designers", "users", column: "designer_id"
   add_foreign_key "rooms", "projects"
-  add_foreign_key "selection_options", "selections"
-  add_foreign_key "selections", "rooms"
 end

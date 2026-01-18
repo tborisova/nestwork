@@ -10,8 +10,8 @@ puts "Seeding database..."
 if Rails.env.development?
   puts "Clearing existing data..."
   Comment.destroy_all
-  SelectionOption.destroy_all
-  Selection.destroy_all
+  PendingProductOption.destroy_all
+  PendingProduct.destroy_all
   Product.destroy_all
   Room.destroy_all
   ProjectClient.destroy_all
@@ -250,15 +250,15 @@ create_products_for_room(master_bedroom, [
 
 master_bath = Room.create!(project: manhattan, name: "Master Bathroom", status: "new")
 
-# Add selections for master bath (pending choices)
-vanity_selection = Selection.create!(room: master_bath, name: "Double Vanity", quantity: 1)
-SelectionOption.create!(selection: vanity_selection, name: "Restoration Hardware Hutton", price: 4500, link: "https://rh.com/hutton-vanity")
-SelectionOption.create!(selection: vanity_selection, name: "Waterworks Henry", price: 6800, link: "https://waterworks.com/henry")
-SelectionOption.create!(selection: vanity_selection, name: "Custom Built-in", price: 8500, link: nil)
+# Add pending products for master bath (pending choices)
+vanity_pending = PendingProduct.create!(room: master_bath, name: "Double Vanity", quantity: 1)
+PendingProductOption.create!(pending_product: vanity_pending, name: "Restoration Hardware Hutton", price: 4500, link: "https://rh.com/hutton-vanity")
+PendingProductOption.create!(pending_product: vanity_pending, name: "Waterworks Henry", price: 6800, link: "https://waterworks.com/henry")
+PendingProductOption.create!(pending_product: vanity_pending, name: "Custom Built-in", price: 8500, link: nil)
 
-mirror_selection = Selection.create!(room: master_bath, name: "Bathroom Mirrors", quantity: 2)
-SelectionOption.create!(selection: mirror_selection, name: "Rejuvenation Arched Mirror", price: 699, link: "https://rejuvenation.com/mirrors")
-SelectionOption.create!(selection: mirror_selection, name: "CB2 Infinity Mirror", price: 449, link: "https://cb2.com/infinity")
+mirror_pending = PendingProduct.create!(room: master_bath, name: "Bathroom Mirrors", quantity: 2)
+PendingProductOption.create!(pending_product: mirror_pending, name: "Rejuvenation Arched Mirror", price: 699, link: "https://rejuvenation.com/mirrors")
+PendingProductOption.create!(pending_product: mirror_pending, name: "CB2 Infinity Mirror", price: 449, link: "https://cb2.com/infinity")
 
 # Brooklyn Brownstone (new) - minimal activity
 brooklyn = projects[1]
@@ -291,11 +291,11 @@ create_products_for_room(sf_living, [
   { name: "Knoll Saarinen Dining Table", price: 8900, status: "pending" }
 ])
 
-# Selections for SF Loft
-lighting_selection = Selection.create!(room: sf_living, name: "Pendant Lights over Island", quantity: 3)
-SelectionOption.create!(selection: lighting_selection, name: "Tom Dixon Beat Light", price: 895, link: "https://tomdixon.net/beat")
-SelectionOption.create!(selection: lighting_selection, name: "Muuto Unfold Pendant", price: 289, link: "https://muuto.com/unfold")
-SelectionOption.create!(selection: lighting_selection, name: "Flos Aim Pendant", price: 1195, link: "https://flos.com/aim")
+# Pending products for SF Loft
+lighting_pending = PendingProduct.create!(room: sf_living, name: "Pendant Lights over Island", quantity: 3)
+PendingProductOption.create!(pending_product: lighting_pending, name: "Tom Dixon Beat Light", price: 895, link: "https://tomdixon.net/beat")
+PendingProductOption.create!(pending_product: lighting_pending, name: "Muuto Unfold Pendant", price: 289, link: "https://muuto.com/unfold")
+PendingProductOption.create!(pending_product: lighting_pending, name: "Flos Aim Pendant", price: 1195, link: "https://flos.com/aim")
 
 # Portland Cottage (in_progress)
 portland = projects[6]
@@ -362,14 +362,14 @@ Comment.create!(
 )
 
 Comment.create!(
-  commentable: vanity_selection,
+  commentable: vanity_pending,
   user: designer_users[0],
   comment: "I recommend the Waterworks Henry - it has the best quality and fits the aesthetic we're going for.",
   resolved: false
 )
 
 Comment.create!(
-  commentable: vanity_selection,
+  commentable: vanity_pending,
   user: client_users[0],
   comment: "The price difference is significant. Can we see the RH option in person before deciding?",
   resolved: false
@@ -384,7 +384,7 @@ Comment.create!(
 )
 
 Comment.create!(
-  commentable: lighting_selection,
+  commentable: lighting_pending,
   user: designer_users[2],
   comment: "The Tom Dixon lights would make a real statement. Let me know if you want to see them in our showroom.",
   resolved: false
@@ -432,7 +432,7 @@ puts "  Firms: #{Firm.count}"
 puts "  Projects: #{Project.count}"
 puts "  Rooms: #{Room.count}"
 puts "  Products: #{Product.count}"
-puts "  Selections: #{Selection.count}"
+puts "  Pending Products: #{PendingProduct.count}"
 puts "  Comments: #{Comment.count}"
 puts ""
 puts "TRY THESE LOGINS:"

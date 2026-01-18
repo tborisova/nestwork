@@ -32,7 +32,7 @@ export default class extends Controller {
     const projectId = this.projectIdValue;
     const typeMap = {
       product: "products",
-      selection: "selections",
+      pending_product: "pending_products",
       room: "rooms",
     };
     return `/projects/${projectId}/${typeMap[type]}/${id}/comments`;

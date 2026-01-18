@@ -46,7 +46,7 @@ class RoomPresenter
       plan_url: room_plan_url(room),
       plan_with_products_url: room_plan_with_products_url(room),
       products: build_products_data(room),
-      selections: build_selections_data(room)
+      pending_products: build_pending_products_data(room)
     }
   end
 
@@ -67,24 +67,24 @@ class RoomPresenter
     end
   end
 
-  # Build selections data for a room
-  def build_selections_data(room)
+  # Build pending products data for a room
+  def build_pending_products_data(room)
     return [] unless room
 
-    room.selections.map do |selection|
+    room.pending_products.map do |pending_product|
       {
-        id: selection.id,
-        name: selection.name,
-        quantity: selection.quantity,
-        comments_count: selection.comments.size,
-        options: build_selection_options_data(selection)
+        id: pending_product.id,
+        name: pending_product.name,
+        quantity: pending_product.quantity,
+        comments_count: pending_product.comments.size,
+        options: build_pending_product_options_data(pending_product)
       }
     end
   end
 
-  # Build selection options data
-  def build_selection_options_data(selection)
-    selection.selection_options.map do |option|
+  # Build pending product options data
+  def build_pending_product_options_data(pending_product)
+    pending_product.pending_product_options.map do |option|
       {
         id: option.id,
         name: option.name,

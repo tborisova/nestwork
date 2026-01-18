@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
   resources :projects, only: [ :index, :new, :create, :show, :update ] do
     post :add_client, on: :member
-    resources :selections, only: [ :new, :create ] do
+    resources :pending_products, only: [ :new, :create ] do
       post :select_option, on: :member
       resources :comments, only: [ :index, :create, :update, :destroy ]
     end

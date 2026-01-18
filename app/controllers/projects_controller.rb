@@ -142,7 +142,7 @@ class ProjectsController < ApplicationController
         :clients,
         rooms: [
           { products: :comments },
-          { selections: [:selection_options, :comments] },
+          { pending_products: [:pending_product_options, :comments] },
           :comments,
           { plan_attachment: :blob },
           { plan_with_products_attachment: :blob }
