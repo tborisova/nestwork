@@ -7,7 +7,6 @@ class ProjectsController < ApplicationController
   before_action :require_project_designer, only: %i[update add_client]
 
   def index
-    @is_designer = current_user.designer?
     @search_form = Projects::SearchForm.new(current_user, params)
     @search_form.execute
   end
