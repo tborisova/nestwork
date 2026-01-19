@@ -4,7 +4,7 @@
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-3xl font-display font-bold gradient-text">Projects</h1>
-      <p class="text-white/50 mt-1"><%= @projects.size %> <%= "project".pluralize(@projects.size) %></p>
+      <p class="text-white/50 mt-1"><%= @search_form.scope.size %> <%= "project".pluralize(@search_form.scope.size) %></p>
     </div>
     <div class="flex items-center gap-3">
       <% active_filters = params[:name].present? || params[:status].present? || params[:designer_ids].present? || params[:client_ids].present? %>
@@ -18,10 +18,10 @@
             <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
           <% end %>
         </button>
-        <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-80 <%= @is_designer ? 'md:w-[500px]' : '' %> z-50">
+        <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-80 <%= current_user.designer? ? 'md:w-[500px]' : '' %> z-50">
           <div class="glass-card rounded-2xl p-5">
             <%= form_with url: projects_path, method: :get, local: true do %>
-              <div class="grid grid-cols-1 <%= @is_designer ? 'md:grid-cols-2' : '' %> gap-4">
+              <div class="grid grid-cols-1 <%= current_user.designer? ? 'md:grid-cols-2' : '' %> gap-4">
                 <div>
                   <label class="block mb-2 text-sm font-medium text-white/70">Search</label>
                   <%= text_field_tag :name, params[:name], placeholder: "Project name...", class: "input-field w-full px-4 py-3 rounded-xl text-white placeholder-white/30 focus:outline-none" %>
@@ -31,11 +31,11 @@
                   <% statuses = [["New","new"],["In progress","in_progress"],["Waiting for approval","waiting_for_approval"],["Done","done"]] %>
                   <%= select_tag :status, options_for_select([["All statuses",""]] + statuses, params[:status]), class: "input-field w-full px-4 py-3 rounded-xl text-white focus:outline-none cursor-pointer" %>
                 </div>
-                <% if @is_designer %>
+                <% if current_user.designer? %>
                   <div>
                     <label class="block mb-2 text-sm font-medium text-white/70">Designers</label>
                     <%= select_tag "designer_ids[]",
-                          options_from_collection_for_select(@filter_designers, :id, :name, Array(params[:designer_ids])),
+                          options_from_collection_for_select(@search_form.designers_options, :id, :name, Array(params[:designer_ids])),
                           multiple: true,
                           include_blank: false,
                           class: "input-field w-full px-4 py-2 rounded-xl text-white focus:outline-none",
@@ -44,7 +44,7 @@
                   <div>
                     <label class="block mb-2 text-sm font-medium text-white/70">Clients</label>
                     <%= select_tag "client_ids[]",
-                          options_from_collection_for_select(@filter_clients, :id, :name, Array(params[:client_ids])),
+                          options_from_collection_for_select(@search_form.clients_options, :id, :name, Array(params[:client_ids])),
                           multiple: true,
                           include_blank: false,
                           class: "input-field w-full px-4 py-2 rounded-xl text-white focus:outline-none",
@@ -60,7 +60,7 @@
           </div>
         </div>
       </div>
-      <% if @is_designer %>
+      <% if current_user.designer? %>
         <%= link_to new_project_path, class: "btn-primary px-5 py-3 rounded-xl text-white font-medium inline-flex items-center gap-2" do %>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -71,10 +71,10 @@
     </div>
   </div>
 
-  <% if @projects.any? %>
+  <% if @search_form.scope.any? %>
     <div class="grid gap-4">
-      <% @projects.each do |project| %>
-        <%= render "projects/project_card", project: project, is_designer: @is_designer %>
+      <% @search_form.scope.each do |project| %>
+        <%= render "projects/project_card", project: project, is_designer: current_user.designer? %>
       <% end %>
     </div>
   <% else %>

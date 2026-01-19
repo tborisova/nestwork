@@ -7,9 +7,9 @@ class ProjectsController < ApplicationController
   before_action :require_project_designer, only: %i[update add_client]
 
   def index
-    @is_designer = current_user_is_designer?
-    load_filter_options if @is_designer
-    @projects = Projects::FilteredQuery.new(accessible_projects, params).execute
+    @is_designer = current_user.designer?
+    @search_form = Projects::SearchForm.new(current_user, params)
+    @search_form.execute
   end
 
   def show
@@ -93,16 +93,6 @@ class ProjectsController < ApplicationController
   end
 
   private
-
-  def load_filter_options
-    firm_id = current_user.firm_id
-
-    @filter_designers = User.where(firm_id: firm_id).order(:name)
-
-    @filter_clients = User.joins(:firms_clients)
-                          .where(firms_clients: { firm_id: firm_id })
-                          .distinct.order(:name)
-  end
 
   def project_params
     params.require(:project).permit(:name, :status)

@@ -29,4 +29,6 @@ class User < ApplicationRecord
   def client_for_project?(project)
     client_projects.exists?(project.id)
   end
+
+  def designer? = firm_id.present?
 end

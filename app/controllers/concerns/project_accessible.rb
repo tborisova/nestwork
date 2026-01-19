@@ -8,21 +8,14 @@
 module ProjectAccessible
   extend ActiveSupport::Concern
 
-  included do
-    helper_method :current_user_is_designer? if respond_to?(:helper_method)
-  end
-
   private
 
   # Returns a scope of projects accessible to the current user
   # (either through firm membership or as a client)
   def accessible_projects
-    if current_user.firm_id
-      Project.where(firm_id: current_user.firm_id)
-             .or(Project.where(id: current_user.client_projects.select(:id)))
-    else
-      Project.where(id: current_user.client_projects.select(:id))
-    end
+    return current_user.designer_projects if current_user.firm_id
+
+    current_user.client_projects
   end
 
   # Find a project by ID from accessible projects
@@ -37,10 +30,7 @@ module ProjectAccessible
     handle_project_not_found
   end
 
-  # Check if current user is a designer (belongs to a firm)
-  def current_user_is_designer?
-    @_current_user_is_designer ||= current_user&.firm_id.present?
-  end
+
 
   # Check if current user is a designer for the given project
   def designer_for_project?(project = @project)
@@ -64,7 +54,7 @@ module ProjectAccessible
 
   # Before action: require user to be a designer (member of a firm)
   def require_designer
-    return if current_user_is_designer?
+    return if current_user.designer?
 
     respond_to do |format|
       format.html { redirect_to projects_path, alert: "Only designers can perform this action" }
