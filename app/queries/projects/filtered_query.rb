@@ -15,10 +15,14 @@ module Projects
       scope = scope.where("projects.name LIKE ?", "%#{params[:name].strip}%") if params[:name].present?
 
       designer_ids = normalize_ids(params[:designer_ids])
-      scope = scope.joins(:designers).where(designers: { id: designer_ids }) if designer_ids.present?
+      if designer_ids.present?
+        scope = scope.where(id: Project.joins(:designers).where(designers: { id: designer_ids }).select(:id))
+      end
 
       client_ids = normalize_ids(params[:client_ids])
-      scope = scope.joins(:clients).where(clients: { id: client_ids }) if client_ids.present?
+      if client_ids.present?
+        scope = scope.where(id: Project.joins(:clients).where(clients: { id: client_ids }).select(:id))
+      end
 
       scope.includes(:designers, :clients, :firm)
     end
