@@ -2,14 +2,14 @@ class ProjectsController < ApplicationController
   include ProjectAccessible
 
   before_action :require_login
-  before_action :require_designer, only: [:new, :create]
-  before_action :set_accessible_project, only: [:update, :add_client]
-  before_action :require_project_designer, only: [:update, :add_client]
+  before_action :require_designer, only: %i[new create]
+  before_action :set_accessible_project, only: %i[update add_client]
+  before_action :require_project_designer, only: %i[update add_client]
 
   def index
     @is_designer = current_user_is_designer?
     load_filter_options if @is_designer
-    @projects = Projects::FilteredQuery.new(accessible_projects, params).call
+    @projects = Projects::FilteredQuery.new(accessible_projects, params).execute
   end
 
   def show
